@@ -687,6 +687,12 @@
   (cheat-no-tex                 #x109e)
   (cheat-mirror                 #x109f)
   (cheat-huge-head              #x10a0)
+
+  (challenges-smalljak          #x10bc)
+  (challenges-bigjak            #x10bd)
+  (challenges-flatjak           #x10be)
+  (challenges-paperjak          #x10bf)
+
   (music-player                 #x10c0)
   (scene-player                 #x10c1)
   (play-credits                 #x10c2)
@@ -758,7 +764,59 @@
   (scene-255                    #x12ff)
   (hint-0                       #x1300)
   (hint-511                     #x14ff)
+
   (speedrunner-mode             #x1500)
+  (cutscene-skips               #x1501)
+
+  ;; Mod Options
+  (mod-options                  #x1600)
+  (checkpoint-randomizer        #x1601)
+  (custom-challenges            #x1602)
+  (rng-lib                      #x1603)
+  (mod-powercellcutscenes       #x1604)
+  (additional-checkpoints       #x1605)
+  
+  ;; Checkpoint Randomizer
+  (item-count-to-trigger-warp   #x1610)
+  (use-random-seed?             #x1611)
+  (randomizer-random-seed       #x1612)
+  (randomizer-set-seed          #x1613)
+  (randomizer-warp-options      #x1614)
+  (checkpoint-warpcells?        #x1615)
+  (checkpoint-warporbs?         #x1616)
+  (checkpoint-warpbuzzer?       #x1617)
+  (checkpoint-warpgreeneco?     #x1618)
+  (checkpoint-warpblueeco?      #x1619)
+  (checkpoint-warpredeco?       #x161a)
+  (checkpoint-warpyelloweco?    #x161b)
+  (checkpoint-warpecovents?     #x161c)
+  (checkpoint-warpdeath?        #x161d)
+  (show-warp-counter?           #x161e)
+  (checkpoint-logic             #x161f)
+  (logic-random-checkpoint      #x1620)
+  (logic-random-level           #x1621)
+
+  ;;Challenges
+  (challenges-orbless           #x1630)
+  (challenges-hardcore          #x1631)
+  (challenges-damageless        #x1632)
+  (challenges-bonkless          #x1633)
+  (challenges-casual            #x1634)
+  (challenges-pacifist          #x1635)
+
+  ;;RNG Library
+  (rand-vu                      #x1640)
+  (knuth                        #x1641)
+
+  ;;Additional Checkpoints
+  (checkpoint-training-far      #x1650)
+  (checkpoint-village1-far      #x1651)
+  (checkpoint-beach-pelican     #x1652)
+  (checkpoint-beach-far         #x1653)
+  (checkpoint-jungle-far        #x1654)
+  (checkpoint-swamp-flutflut    #x1655)
+  (checkpoint-village3-cart     #x1656)
+
 ;; GAME-TEXT-ID ENUM ENDS
   )
 
@@ -801,6 +859,3 @@
 
 
 (defun-extern print-game-text string font-context symbol int int float)
-
-
-

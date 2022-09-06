@@ -670,10 +670,10 @@
                 (set! gp-0 v1-3)
                 (cond
                   ((> v1-3 0)
-                   (sound-play "snow-spat-long" :pitch (rand-vu-float-range -0.2 0.2))
+                   (sound-play "snow-spat-long" :pitch (mod-rand-float-range -0.2 0.2))
                    )
                   (1
-                    (sound-play "snow-spat-short" :pitch (rand-vu-float-range -0.2 0.2))
+                    (sound-play "snow-spat-short" :pitch (mod-rand-float-range -0.2 0.2))
                     )
                   )
                 )
@@ -1375,7 +1375,10 @@
       (set! v1-1 (or (not *target*) (zero? (logand (-> *target* state-flags) (state-flags grabbed)))))
       )
     (sound-play "prec-button1" :pitch -1)
-    (let ((gp-1 (get-process *default-dead-pool* snowcam #x4000)))
+    (if (not (and (enable-no-powercell-cutscenes)))
+    (begin
+
+        (let ((gp-1 (get-process *default-dead-pool* snowcam #x4000)))
       (set! (-> (the-as snowcam (-> (when gp-1
                                       (let ((t9-3 (method-of-type snowcam activate)))
                                         (t9-3 (the-as snowcam gp-1) self 'snowcam (the-as pointer #x70004000))
@@ -1401,6 +1404,8 @@
             )
       )
     0
+    )
+    )
     (let ((gp-2 #f))
       (loop
         (let ((s5-1 (new 'stack-no-clear 'vector))
@@ -1647,12 +1652,12 @@
               ((and gp-0 (< f0-4 1.0))
                (set! gp-0 #f)
                (set! s5-0 #t)
-               (sound-play "snow-spat-long" :vol 85 :pitch (rand-vu-float-range -0.2 0.2))
+               (sound-play "snow-spat-long" :vol 85 :pitch (mod-rand-float-range -0.2 0.2))
                )
               ((and s5-0 (>= f0-4 11.0))
                (set! s5-0 #f)
                (set! gp-0 #t)
-               (sound-play "snow-spat-short" :vol 85 :pitch (rand-vu-float-range -0.2 0.2))
+               (sound-play "snow-spat-short" :vol 85 :pitch (mod-rand-float-range -0.2 0.2))
                )
               )
             )

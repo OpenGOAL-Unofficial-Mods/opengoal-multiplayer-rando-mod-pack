@@ -246,7 +246,7 @@ eco-door-event-handler
       (clear-collide-with-as (-> self root-override))
       (until (ja-done? 0)
         (ja :num! (seek! max (-> self speed)))
-        (if (and gp-0 (rand-vu-percent? 0.5))
+        (if (and gp-0 (mod-rand-percent? 0.5))
             (spawn-projectile-blue *target*)
             )
         (suspend)

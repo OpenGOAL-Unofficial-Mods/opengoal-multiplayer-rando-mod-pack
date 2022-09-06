@@ -1437,7 +1437,7 @@
   (when (>= (- (-> *display* base-frame-counter) (-> self turn-time)) (-> self swing-time))
     (set! (-> self turn-time) (-> *display* base-frame-counter))
     (set! (-> self swing-time)
-          (rand-vu-int-range (the-as int (-> self params swing-min)) (the-as int (-> self params swing-max)))
+          (mod-rand-int-range (the-as int (-> self params swing-min)) (the-as int (-> self params swing-max)))
           )
     (set! (-> self params vel) (- (-> self params vel)))
     )
@@ -1460,7 +1460,7 @@
              )
     (let ((gp-0
             (cond
-              ((rand-vu-percent? (-> self params powerup-percent))
+              ((mod-rand-percent? (-> self params powerup-percent))
                (if (and (>= (- (-> *display* base-frame-counter) (-> self ambient-big-one)) (seconds 30))
                         (play-ambient (-> self ambient) "FIS-TA03" #t (-> self root-override trans))
                         )
@@ -1468,10 +1468,10 @@
                    )
                'powerup
                )
-              ((rand-vu-percent? (-> self params bad-percent))
+              ((mod-rand-percent? (-> self params bad-percent))
                'bad
                )
-              ((rand-vu-percent? (-> self params deadly-percent))
+              ((mod-rand-percent? (-> self params deadly-percent))
                'deadly
                )
               (else

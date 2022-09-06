@@ -428,7 +428,7 @@ swamp-bat-slave-event-handler
   (set! (-> self fact)
         (new 'process 'fact-info-enemy self (pickup-type eco-pill-random) (-> *FACT-bank* default-pill-inc))
         )
-  (set! (-> self idle-anim-speed) (rand-vu-float-range 0.9 1.1))
+  (set! (-> self idle-anim-speed) (mod-rand-float-range 0.9 1.1))
   (set! (-> self strafe-distance) 0.0)
   (set! (-> self strafe-envelope) 0.0)
   (set! (-> self idle-position-index) arg1)

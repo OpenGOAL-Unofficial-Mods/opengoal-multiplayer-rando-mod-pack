@@ -265,9 +265,12 @@
   )
 
 (defmethod animate eco-collectable ((obj eco-collectable))
+
   0
   (none)
-  )
+  
+
+)
 
 (defun add-blue-shake ((arg0 vector) (arg1 vector) (arg2 vector))
   (let* ((f0-0 (vector-vector-distance arg1 arg2))
@@ -280,9 +283,9 @@
                   )
                 )
          )
-    (+! (-> arg0 x) (rand-vu-float-range (- f30-0) f30-0))
-    (+! (-> arg0 y) (rand-vu-float-range (- f30-0) f30-0))
-    (+! (-> arg0 z) (rand-vu-float-range (- f30-0) f30-0))
+    (+! (-> arg0 x) (mod-rand-float-range (- f30-0) f30-0))
+    (+! (-> arg0 y) (mod-rand-float-range (- f30-0) f30-0))
+    (+! (-> arg0 z) (mod-rand-float-range (- f30-0) f30-0))
     )
   arg0
   )
@@ -333,7 +336,7 @@
           (let ((s2-0 (-> self root-override root-prim prim-core))
                 (gp-2 (-> v1-6 root-prim prim-core))
                 )
-            (if (and arg1 (rand-vu-percent? (the-as float 0.25)))
+            (if (and arg1 (mod-rand-percent? (the-as float 0.25)))
                 (eco-blue-glow (the-as vector s2-0))
                 )
             (let ((f0-0 (vector-vector-distance (the-as vector s2-0) (the-as vector gp-2))))
@@ -633,7 +636,7 @@
   :enter (behavior ((arg0 handle))
     (set! (-> self target) arg0)
     (set! (-> self speed quad) (the-as uint128 0))
-    (set! (-> self speed z) (the-as float (if (rand-vu-percent? (the-as float 0.5))
+    (set! (-> self speed z) (the-as float (if (mod-rand-percent? (the-as float 0.5))
                                               1.0
                                               -1.0
                                               )
@@ -785,10 +788,25 @@
       (((pickup-type eco-green))
        (sound-play "g-eco-pickup")
        )
-      (((pickup-type eco-green) (pickup-type eco-pill))
+      (((pickup-type eco-pill))
        (sound-play "pill-pickup")
        )
       )
+    
+    (if (and 
+        (-> *randomizer-settings* checkpoint-randomizer?)
+        (or 
+          (and (-> *randomizer-settings* warp-on-green-eco?) (= (-> self fact pickup-type) (pickup-type eco-green)))
+          (and (-> *randomizer-settings* warp-on-green-eco?) (= (-> self fact pickup-type) (pickup-type eco-pill)))
+          (and (-> *randomizer-settings* warp-on-blue-eco?) (= (-> self fact pickup-type) (pickup-type eco-blue)))
+          (and (-> *randomizer-settings* warp-on-red-eco?) (= (-> self fact pickup-type) (pickup-type eco-red)))
+          (and (-> *randomizer-settings* warp-on-yellow-eco?) (= (-> self fact pickup-type) (pickup-type eco-yellow)))
+        )
+      )
+     (begin
+        (orchestrateCheckpointWarp 1)
+      )
+    )
     (if (nonzero? (-> self part))
         (kill-and-free-particles (-> self part))
         )
@@ -1188,18 +1206,30 @@
     (none)
     )
   )
-
+  
+(define-extern orb-cache-top (type))
 (defstate pickup (money)
   :virtual #t
   :code (behavior ((arg0 object) (arg1 handle))
-    (if (nonzero? (-> self part))
-        (kill-and-free-particles (-> self part))
+    (let ((money-parent (ppointer->process (-> self parent))))
+      (if (nonzero? (-> self part))
+          (kill-and-free-particles (-> self part))
+          )
+      (logclear! (-> self mask) (process-mask actor-pause))
+      (clear-collide-with-as (-> self root-override))
+      (process-entity-status! self (entity-perm-status dead) #t)
+      ;; if the randomizer is on AND set to warp on orbs AND this isn't from an orb cache, warp the target.
+      ;; see orb-cache.gc for how those warps are handled
+      (when (and 
+          (-> *randomizer-settings* checkpoint-randomizer?) 
+          (-> *randomizer-settings* warp-on-orb?)
+          (!= (-> money-parent type) orb-cache-top)
         )
-    (logclear! (-> self mask) (process-mask actor-pause))
-    (clear-collide-with-as (-> self root-override))
-    (process-entity-status! self (entity-perm-status dead) #t)
-    (convert-to-hud-object self (the-as hud (ppointer->process (-> *hud-parts* money))))
-    (none)
+        (orchestrateCheckpointWarp 1)
+      )
+      (convert-to-hud-object self (the-as hud (ppointer->process (-> *hud-parts* money))))
+      (none)
+    )
     )
   )
 
@@ -1522,6 +1552,9 @@
     )
   )
 
+
+
+
 (defstate pickup (fuel-cell)
   :virtual #t
   :enter (behavior ((arg0 object) (arg1 handle))
@@ -1599,6 +1632,9 @@
     (logclear! (-> self draw status) (draw-status hidden))
     (process-entity-status! self (entity-perm-status dead) #t)
     (stop! (-> self sound))
+    (if (enable-no-powercell-cutscenes)
+
+    (begin
     (while (handle->process (-> *game-info* other-camera-handle))
       (format
         #t
@@ -1656,7 +1692,13 @@
         )
       )
     (spool-push *art-control* (-> self victory-anim name) 0 self (the-as float -99.0))
+  )
+)
+    
     (send-event *target* 'get-pickup (-> self fact pickup-type) (-> self fact pickup-amount))
+    (if 
+    (enable-no-powercell-cutscenes)
+    (begin
     (set! (-> self draw bounds w) 32768.0)
     (logior! (-> self skel status) (janim-status inited))
     (send-event *target* 'blend-shape #t)
@@ -1664,23 +1706,45 @@
     (add-setting! 'sfx-volume 'rel (-> *setting-control* current sfx-volume-movie) 0)
     (add-setting! 'ambient-volume 'rel (-> *setting-control* current ambient-volume-movie) 0)
     (process-spawn othercam self 10 #f #t :to self)
+    ))
+   
     (auto-save-command 'auto-save 0 0 *default-pool*)
-    (ja-play-spooled-anim
-      (-> self victory-anim)
-      (the-as art-joint-anim (-> self draw art-group data 2))
-      (the-as art-joint-anim #f)
-      (the-as (function process-drawable symbol) false-func)
-      )
+
+    ;; play powercell animation if randomizer disabled
+    (if 
+     (enable-no-powercell-cutscenes)
+      (begin
+          (ja-play-spooled-anim
+        (-> self victory-anim)
+        (the-as art-joint-anim (-> self draw art-group data 2))
+        (the-as art-joint-anim #f)
+        (the-as (function process-drawable symbol) false-func)
+        )))
+
+ (if (and (not flutflut?) (not racer?)) 
+ (begin
+   (send-event *target* 'end-mode)
+ ))
+
+ 
+  
+
     (remove-setting! 'music-volume)
     (remove-setting! 'sfx-volume)
     (remove-setting! 'ambient-volume)
     (send-event *target* 'blend-shape #f)
-    (send-event *target* 'end-mode)
     (send-event *camera* 'no-intro)
     (send-event *camera* 'clear-entity)
     (ja-channel-set! 0)
     (suspend)
     (suspend)
+
+    
+    ;; warp to random checkpoint if randomizer enabled
+    (if (and (-> *randomizer-settings* checkpoint-randomizer?) (-> *randomizer-settings* warp-on-cell?))
+      (orchestrateCheckpointWarp 1)
+    )
+
     (process-spawn-function
       process
       (lambda :behavior collectable
@@ -1935,16 +1999,24 @@
       )
     (case (the int (-> self fact pickup-amount))
       (((game-task citadel-sage-blue))
+      (if (not enable-citadel-cutscene-skips)
        (send-event (process-by-name "blue-sagecage-1" *active-pool*) 'play-anim)
+      )
        )
       (((game-task citadel-sage-red))
+        (if (not enable-citadel-cutscene-skips)
        (send-event (process-by-name "red-sagecage-1" *active-pool*) 'play-anim)
+      )
        )
       (((game-task citadel-sage-yellow))
+    (if (not enable-citadel-cutscene-skips)
        (send-event (process-by-name "yellow-sagecage-1" *active-pool*) 'play-anim)
+      )
        )
       (((game-task citadel-sage-green))
+    (if (not enable-citadel-cutscene-skips)
        (send-event (process-by-name "green-sagecage-1" *active-pool*) 'play-anim)
+      )
        )
       (((game-task jungle-eggtop) (game-task snow-eggtop) (game-task snow-ball) (game-task sunken-slide))
        )
@@ -2286,6 +2358,11 @@
           )
         )
       )
+    (if (and (-> *randomizer-settings* checkpoint-randomizer?) (-> *randomizer-settings* warp-on-buzzer?))
+    (begin
+       (orchestrateCheckpointWarp 1)
+    )
+    )
     (none)
     )
   )
@@ -2621,14 +2698,14 @@
               (cond
                 ((and (= s1-0 1)
                       *target*
-                      (and (>= 1.0 (-> *target* fact-info-target health)) (rand-vu-percent? (the-as float 0.1)))
+                      (and (>= 1.0 (-> *target* fact-info-target health)) (mod-rand-percent? (the-as float 0.1)))
                       )
                  (set! s3-0 (pickup-type eco-green))
                  1.0
                  )
                 ((and (< 1 s1-0)
                       *target*
-                      (and (>= 2.0 (-> *target* fact-info-target health)) (rand-vu-percent? (the-as float 0.05)))
+                      (and (>= 2.0 (-> *target* fact-info-target health)) (mod-rand-percent? (the-as float 0.05)))
                       )
                  (set! s3-0 (pickup-type eco-green))
                  1.0
@@ -2641,10 +2718,10 @@
                  1.0
                  )
                 ((type-type? (-> obj type) fact-info-enemy)
-                 (+ (rand-vu-float-range (the-as float 3.0) (+ 5.0 f30-0)) (the float arg3))
+                 (+ (mod-rand-float-range (the-as float 3.0) (+ 5.0 f30-0)) (the float arg3))
                  )
                 (else
-                  (+ (rand-vu-float-range (the-as float 2.0) (+ 3.0 f30-0)) (the float arg3))
+                  (+ (mod-rand-float-range (the-as float 2.0) (+ 3.0 f30-0)) (the float arg3))
                   )
                 )
               )
@@ -2662,6 +2739,7 @@
                   (the-as process-drawable #f)
                   s1-1
                   (new 'static 'pat-surface :noentity #x1)
+                  *collide-work*
                   )
                 0.0
                 )
@@ -2890,6 +2968,20 @@
 
 (defstate vent-wait-for-touch (vent)
   :event (behavior ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+    (if (and
+        (-> *randomizer-settings* checkpoint-randomizer?)
+        (-> *randomizer-settings* warp-on-eco-vents?)
+        (or
+          (and (-> *randomizer-settings* warp-on-green-eco?) (= (-> self fact pickup-type) (pickup-type eco-green)))
+          (and (-> *randomizer-settings* warp-on-blue-eco?) (= (-> self fact pickup-type) (pickup-type eco-blue)))
+          (and (-> *randomizer-settings* warp-on-red-eco?) (= (-> self fact pickup-type) (pickup-type eco-red)))
+          (and (-> *randomizer-settings* warp-on-yellow-eco?) (= (-> self fact pickup-type) (pickup-type eco-yellow)))
+        )
+       )
+      (begin
+        (orchestrateCheckpointWarp 1)
+       )
+      )
     (if (and (or (= arg2 'touch) (= arg2 'attack))
              (let ((a1-1 (new 'stack-no-clear 'event-message-block)))
                (set! (-> a1-1 from) self)

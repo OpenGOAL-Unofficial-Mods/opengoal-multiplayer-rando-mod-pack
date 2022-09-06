@@ -679,6 +679,8 @@
                 (-> self root-override)
                 (-> self root-override transv)
                 (-> self root-override root-prim collide-with)
+                *collide-cache*
+                *collide-work*
                 )
               (set! (-> self old-dist (-> self old-dist-count))
                     (* 0.0625 (vector-vector-distance s3-0 (-> self root-override trans)))
@@ -1122,7 +1124,7 @@
                 )
          )
     (if v1-20
-        (set! (-> obj joint-num) (rand-vu-int-range 3 (+ (-> (the-as process-drawable v1-20) node-list length) -1)))
+        (set! (-> obj joint-num) (mod-rand-int-range 3 (+ (-> (the-as process-drawable v1-20) node-list length) -1)))
         )
     )
   0
@@ -1158,14 +1160,14 @@
   (local-vars (sv-48 entity-actor))
   (with-pp
     (when arg0
-      (let ((s3-0 (rand-vu-int-range 3 (+ (-> arg0 node-list length) -1)))
+      (let ((s3-0 (mod-rand-int-range 3 (+ (-> arg0 node-list length) -1)))
             (gp-0 (new-stack-vector0))
             )
         (set-vector!
           gp-0
-          (rand-vu-float-range -81920.0 81920.0)
-          (rand-vu-float-range -81920.0 81920.0)
-          (rand-vu-float-range -81920.0 81920.0)
+          (mod-rand-float-range -81920.0 81920.0)
+          (mod-rand-float-range -81920.0 81920.0)
+          (mod-rand-float-range -81920.0 81920.0)
           1.0
           )
         (let ((s4-1 (get-process *default-dead-pool* projectile-blue #x4000)))
@@ -1222,7 +1224,7 @@
   )
 
 (defmethod dummy-24 projectile-blue ((obj projectile-blue))
-  (if (rand-vu-percent? 0.75)
+  (if (mod-rand-percent? 0.75)
       (eco-blue-glow (the-as vector (-> obj root-override root-prim prim-core)))
       )
   0

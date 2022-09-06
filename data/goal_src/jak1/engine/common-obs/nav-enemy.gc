@@ -10,30 +10,30 @@
 ;; DECOMP BEGINS
 
 (defun nav-enemy-rnd-float ()
-  (rand-vu)
+  (mod-rand-next-float)
   )
 
 (defun nav-enemy-rnd-percent? ((arg0 float))
-  (>= arg0 (rand-vu))
+  (>= arg0 (mod-rand-next-float))
   )
 
 (defbehavior nav-enemy-rnd-float-range nav-enemy ((arg0 float) (arg1 float))
-  (+ arg0 (* (rand-vu) (- arg1 arg0)))
+  (+ arg0 (* (mod-rand-next-float) (- arg1 arg0)))
   )
 
 (defun nav-enemy-rnd-int-count ((arg0 int))
-  (the int (* (rand-vu) (the float arg0)))
+  (the int (* (mod-rand-next-float) (the float arg0)))
   )
 
 (defun nav-enemy-rnd-int-range ((arg0 int) (arg1 int))
-  (+ arg0 (the int (* (rand-vu) (the float (+ (- 1 arg0) arg1)))))
+  (+ arg0 (the int (* (mod-rand-next-float) (the float (+ (- 1 arg0) arg1)))))
   )
 
 (defun nav-enemy-rnd-go-idle? ((arg0 float))
   (let* ((v1-3 (-> *display* frames (-> *display* last-screen) frame run-time))
          (f1-2 (fmax 0.0 (fmin 1.0 (* 0.001 (+ -7000.0 (the float v1-3))))))
          )
-    (>= (+ arg0 (* f1-2 (- 1.0 arg0))) (rand-vu))
+    (>= (+ arg0 (* f1-2 (- 1.0 arg0))) (mod-rand-next-float))
     )
   )
 
@@ -443,6 +443,8 @@ nav-enemy-default-event-handler
     (-> self collide-info)
     (-> self collide-info transv)
     (-> self collide-info root-prim collide-with)
+    *collide-cache*
+    *collide-work*
     )
   (nav-enemy-common-post)
   0
@@ -1624,7 +1626,7 @@ nav-enemy-default-event-handler
     (when (not (ja-group? (-> self draw art-group data (-> self nav-info idle-anim))))
       (ja-channel-push! 1 (seconds 0.2))
       (ja :group! (-> self draw art-group data (-> self nav-info idle-anim))
-          :num! (identity (rand-vu-float-range 0.0 (the float (+ (-> (ja-group) data 0 length) -1))))
+          :num! (identity (mod-rand-float-range 0.0 (the float (+ (-> (ja-group) data 0 length) -1))))
           )
       )
     (let ((f30-0 (nav-enemy-rnd-float-range 0.75 1.25)))

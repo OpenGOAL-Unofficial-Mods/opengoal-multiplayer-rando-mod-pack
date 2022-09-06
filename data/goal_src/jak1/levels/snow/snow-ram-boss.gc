@@ -1606,7 +1606,7 @@
              )
          (when (>= (-> self frustration) 256)
            (set! (-> self frustration) 0)
-           (set! (-> self nav-enemy-patrol-timeout) (rand-vu-int-range (seconds 2) (seconds 5)))
+           (set! (-> self nav-enemy-patrol-timeout) (mod-rand-int-range (seconds 2) (seconds 5)))
            (go-virtual nav-enemy-patrol)
            )
          )

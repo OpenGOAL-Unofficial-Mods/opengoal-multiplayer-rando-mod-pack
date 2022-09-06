@@ -1,6 +1,6 @@
 ;;-*-Lisp-*-
 (in-package goal)
-
+(define-extern reset-all (function none))
 ;; name: game-info.gc
 ;; name in dgo: game-info
 ;; dgos: GAME, ENGINE
@@ -163,6 +163,25 @@
   (-> obj task-perm-list data arg0)
   )
 
+(defun enable-or-disable-additional-continue-flag ((obj game-info) (continue-name string) (enable? symbol))
+  (if enable?
+    (logclear! (-> (get-continue-by-name obj continue-name) flags) (continue-flags additional-disabled))
+    (logior! (-> (get-continue-by-name obj continue-name) flags) (continue-flags additional-disabled))
+    )
+  (none)
+  )
+
+(defun update-additional-continue-flags ((obj game-info))
+  (enable-or-disable-additional-continue-flag obj "training-far" (-> *mods-settings* checkpoint-training-far))
+  (enable-or-disable-additional-continue-flag obj "village1-far" (-> *mods-settings* checkpoint-village1-far))
+  (enable-or-disable-additional-continue-flag obj "beach-pelican" (-> *mods-settings* checkpoint-beach-pelican))
+  (enable-or-disable-additional-continue-flag obj "beach-far" (-> *mods-settings* checkpoint-beach-far))
+  (enable-or-disable-additional-continue-flag obj "jungle-far" (-> *mods-settings* checkpoint-jungle-far))
+  (enable-or-disable-additional-continue-flag obj "swamp-flutflut" (-> *mods-settings* checkpoint-swamp-flutflut))
+  (enable-or-disable-additional-continue-flag obj "village3-cart" (-> *mods-settings* checkpoint-village3-cart))
+  )
+
+(define-extern orchestrateCheckpointWarp (function int none))
 (defmethod initialize! game-info ((obj game-info) (cause symbol) (save-to-load game-save) (continue-point-override string))
   "Initialize the game-info.
     The cause can be 'dead if you die, or 'game to reset everything.
@@ -204,6 +223,11 @@
          (goto cfg-50)
          )
        )
+     (if (and (-> *randomizer-settings* checkpoint-randomizer?) (-> *randomizer-settings* warp-on-death?))
+      (begin
+        (orchestrateCheckpointWarp 1)
+       )
+      )
      )
     )
   (kill-current-level-hint '() '() 'die)
@@ -229,14 +253,19 @@
                           )
                     )
      (set! (-> obj auto-save-count) 0)
-     (set! (-> *setting-control* default auto-save) #f)
+     ;; mod skip disabling autosave if we want to autosave overtop.
+     (if (not (or (-> *challenges-settings* challenges-hardcore?)(-> *challenges-settings* challenges-orbless?)))
+     (begin
+      (set! (-> *setting-control* default auto-save) #f)
+     )
+     )
      (set! (-> obj money) 0.0)
      (set! (-> obj fuel) 0.0)
      (set! (-> obj money-total) 0.0)
      (set! (-> obj buzzer-total) 0.0)
      (set! (-> obj perm-list length) 0)
      (clear-all! (-> obj text-ids-seen))
-     (set! (-> obj death-movie-tick) (rand-vu-int-count 10))
+     (set! (-> obj death-movie-tick) (mod-rand-int-count 10))
      (set! (-> obj total-deaths) 0)
      (set! (-> obj continue-deaths) 0)
      (set! (-> obj fuel-cell-deaths) 0)
@@ -258,6 +287,10 @@
        (set! (-> obj level-opened v1-53) (the-as uint 0))
        (nop!)
        )
+     (set! (-> obj green-eco-total) 0.0)
+     (set! (-> obj blue-eco-total) 0.0)
+     (set! (-> obj red-eco-total) 0.0)
+     (set! (-> obj yellow-eco-total) 0.0)
      )
     )
   (case cause
@@ -323,9 +356,9 @@
       )
     )
   (label cfg-50)
+  (update-additional-continue-flags obj)
   obj
   )
-
 
 (defmethod adjust game-info ((obj game-info) (item symbol) (amount float) (source handle))
   "Adjust the number of items by amount."
@@ -434,6 +467,22 @@
          )
        buzz-count
        )
+     )
+    (('eco-green 'eco-pill)
+     ;; increment our eco count
+     (when (> amount 0) (+! (-> obj green-eco-total) amount))
+     )
+    (('eco-blue)
+     ;; increment our eco count
+     (+! (-> obj blue-eco-total) amount)
+     )
+    (('eco-red)
+     ;; increment our eco count
+     (+! (-> obj red-eco-total) amount)
+     )
+    (('eco-yellow)
+     ;; increment our eco count
+     (+! (-> obj yellow-eco-total) amount)
      )
     )
   )
@@ -573,6 +622,8 @@
        :delay (nop!)
        )
      (-> obj health)
+
+     (adjust (-> (the-as target (-> obj process)) game) 'eco-green amount source-handle)
      )
 
     (((pickup-type eco-pill))
@@ -583,7 +634,8 @@
        (seek! (-> obj eco-pill) (-> obj eco-pill-max) amount)
 
        ;; increment big health if needed
-       (when (and (>= (-> obj eco-pill) (-> *FACT-bank* eco-pill-max-default)) (< (-> obj health) (-> obj health-max)))
+       (if (and (>= (-> obj eco-pill) (-> *FACT-bank* eco-pill-max-default)) (< (-> obj health) (-> obj health-max)))
+        (begin
          ;; decrease eco pills
          (set! (-> obj eco-pill) (- (-> obj eco-pill) (-> *FACT-bank* eco-pill-max-default)))
          ;; get a big health.
@@ -594,6 +646,11 @@
            (process->handle (-> obj process))
            )
          )
+        (begin
+          ;; only increment green-eco-total if this didn't result in big health pickup
+          (adjust (-> (the-as target (-> obj process)) game) 'eco-pill amount source-handle)
+         )
+       )
        )
      (-> obj eco-pill)
      )
@@ -603,8 +660,19 @@
      (when (< 0.0 amount)
        ;; play sound.
        (if (>= (- (-> *display* base-frame-counter) (-> obj money-pickup-time)) (seconds 0.05))
-           (sound-play "money-pickup")
-           )
+          (begin
+            ;;orbless mod
+            (if (-> *challenges-settings* challenges-orbless?)
+            (begin 
+              (reset-all)
+              (return 1.0)
+            )
+            (begin
+             (sound-play "money-pickup")
+            )
+            ) 
+          )
+       )
        (set! (-> obj money-pickup-time) (-> *display* base-frame-counter))
        )
      (adjust (-> (the-as target (-> obj process)) game) 'money amount source-handle)
@@ -688,8 +756,8 @@
                        (< (- (-> *display* base-frame-counter) (-> obj eco-source-time)) (seconds 0.5))
                        )
                   )
-         (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 127 (seconds 0.2))
-         (cpad-set-buzz! (-> *cpad-list* cpads 0) 0 17 (seconds 0.2))
+         (cpad-set-buzz! (-> (the-as target (-> obj process)) control unknown-cpad-info00) 1 127 (seconds 0.2))
+         (cpad-set-buzz! (-> (the-as target (-> obj process)) control unknown-cpad-info00) 0 17 (seconds 0.2))
          (case kind
            (((pickup-type eco-blue))
             (sound-play "get-blue-eco")
@@ -758,6 +826,23 @@
            )
          )
        )
+
+     (when (> amount 0.0)
+      (case kind
+            (((pickup-type eco-blue))
+              (adjust (-> (the-as target (-> obj process)) game) 'eco-blue amount source-handle)
+              )
+            (((pickup-type eco-green))
+              (adjust (-> (the-as target (-> obj process)) game) 'eco-green amount source-handle)
+              )
+            (((pickup-type eco-yellow))
+              (adjust (-> (the-as target (-> obj process)) game) 'eco-yellow amount source-handle)
+              )
+            (((pickup-type eco-red))
+              (adjust (-> (the-as target (-> obj process)) game) 'eco-red amount source-handle)
+              )
+            )
+      )
      (-> obj eco-level)
      )
     (else

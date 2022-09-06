@@ -177,7 +177,7 @@ battlecontroller-default-event-handler
 
 (defbehavior battlecontroller-spawn-creature battlecontroller ((arg0 vector) (arg1 vector))
   (local-vars (v1-25 pickup-type))
-  (let ((f0-0 (rand-vu))
+  (let ((f0-0 (mod-rand-next-float))
         (v1-0 0)
         )
     (dotimes (a0-1 (-> self creature-type-count))
@@ -211,7 +211,7 @@ battlecontroller-default-event-handler
         (+! (-> self spawn-count) 1)
         (-> self fact pickup-type)
         (cond
-          ((and (< (-> s5-0 pickup-count) (-> s5-0 max-pickup-count)) (rand-vu-percent? (-> s5-0 pickup-percent)))
+          ((and (< (-> s5-0 pickup-count) (-> s5-0 max-pickup-count)) (mod-rand-percent? (-> s5-0 pickup-percent)))
            (+! (-> s5-0 pickup-count) 1)
            (set! v1-25 (-> s5-0 pickup-type))
            )
@@ -260,7 +260,7 @@ battlecontroller-default-event-handler
   )
 
 (defbehavior battlecontroller-spawn-creature-random-spawner battlecontroller ()
-  (let* ((gp-0 (rand-vu-int-count (-> self spawner-count)))
+  (let* ((gp-0 (mod-rand-int-count (-> self spawner-count)))
          (v1-2 (-> self spawner-array gp-0))
          )
     (when (and (-> v1-2 enabled) (-> v1-2 blocker-actor))

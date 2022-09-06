@@ -355,7 +355,7 @@
       num-func-identity
       )
     (set! (-> s5-1 frame-num)
-          (rand-vu-float-range 0.0 (the float (+ (-> (if (> (-> obj skel active-channels) 0)
+          (mod-rand-float-range 0.0 (the float (+ (-> (if (> (-> obj skel active-channels) 0)
                                                          (-> obj skel root-channel 0 frame-group)
                                                          )
                                                      data
@@ -368,7 +368,7 @@
                                )
           )
     )
-  (set! (-> obj anim-speed) (rand-vu-float-range 0.2 0.4))
+  (set! (-> obj anim-speed) (mod-rand-float-range 0.2 0.4))
   (set! *seaweed* obj)
   (go seaweed-idle)
   (none)

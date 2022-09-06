@@ -222,9 +222,9 @@
   )
 
 (defun dark-plant-randomize ((arg0 dark-plant))
-  (quaternion-axis-angle! (-> arg0 root quat) 0.0 1.0 0.0 (rand-vu-float-range 0.0 65536.0))
+  (quaternion-axis-angle! (-> arg0 root quat) 0.0 1.0 0.0 (mod-rand-float-range 0.0 65536.0))
   (let ((s5-1 (new 'stack-no-clear 'vector)))
-    (set-vector! s5-1 (rand-vu-float-range -1024.0 1024.0) 0.0 (rand-vu-float-range -1024.0 1024.0) 1.0)
+    (set-vector! s5-1 (mod-rand-float-range -1024.0 1024.0) 0.0 (mod-rand-float-range -1024.0 1024.0) 1.0)
     (vector+! (-> arg0 root trans) (-> arg0 entity extra trans) s5-1)
     )
   )
@@ -344,7 +344,7 @@
                  *target*
                  (>= 81920.0 (vector-vector-distance (-> self root trans) (-> *target* control trans)))
                  )
-        (if (rand-vu-percent? 0.3)
+        (if (mod-rand-percent? 0.3)
             (sound-play "darkvine-move")
             )
         (when (task-closed? (game-task rolling-plants) (task-status need-hint))
@@ -1417,8 +1417,8 @@
   ()
   :heap-base #x70
   :method-count-assert 30
-  :size-assert         #xdc
-  :flag-assert         #x1e007000dc
+  :size-assert         #xd4
+  :flag-assert         #x1e007000d4
   )
 
 
@@ -1449,7 +1449,10 @@
     (set! (-> v1-2 far-fade-dist) 245760.0)
     (set! (-> v1-2 waveform) (the-as ripple-wave-set ripple-for-rolling-water))
     )
-  (logclear! (-> obj flags) (water-flags wt23))
+
+  (dotimes (tgt-idx 4)
+    (logclear! (-> obj flags tgt-idx) (water-flags wt23))
+    )
   (none)
   )
 

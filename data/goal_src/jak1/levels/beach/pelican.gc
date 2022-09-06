@@ -6,7 +6,7 @@
 ;; dgos: BEA, L1
 
 ;; DECOMP BEGINS
-
+(define-extern enable-pelican-explode-punch (function symbol))
 (import "goal_src/jak1/import/pelican-ag.gc")
 
 (deftype pelican-bank (basic)
@@ -311,8 +311,8 @@
     (suspend)
     (send-event (-> self fuel-cell process 0) 'trans-hook fuel-cell-animate)
     (pelican-fly
-      (the-as (function pelican int) (lambda () (rand-vu-int-range 2 4)))
-      (the-as (function pelican int) (lambda () (rand-vu-int-range 3 5)))
+      (the-as (function pelican int) (lambda () (mod-rand-int-range 2 4)))
+      (the-as (function pelican int) (lambda () (mod-rand-int-range 3 5)))
       )
     (none)
     )
@@ -443,8 +443,8 @@
         object
         (cond
           ((= v1-0 'attack)
-           (case (-> arg3 param 1)
-             (('explode)
+           (if (or (enable-pelican-explode-punch) (= (-> arg3 param 1) 'explode))
+            (begin
               (let ((a0-2 (handle->process (-> self fuel-cell))))
                 (if a0-2
                     (send-event a0-2 'trans (-> self root-override trans))
@@ -453,7 +453,7 @@
               (go pelican-explode #f)
               #f
               )
-             (else
+            (begin
                (let* ((gp-0 arg0)
                       (v1-13 (if (and (nonzero? gp-0) (type-type? (-> gp-0 type) process-drawable))
                                  gp-0
@@ -736,7 +736,7 @@
     )
   :code (behavior ()
     (pelican-fly
-      (the-as (function pelican int) (lambda () (rand-vu-int-range 2 4)))
+      (the-as (function pelican int) (lambda () (mod-rand-int-range 2 4)))
       (the-as (function pelican int) zero-func)
       )
     (none)
@@ -931,6 +931,11 @@
                                           )
                                      )
            )
+           (if (enable-pelican-explode-punch)
+            ;;This would be important in a no cutscenes as well.
+              (go pelican-wait-at-end #t)
+            )
+            
          (send-event (ppointer->process s5-2) 'trans-hook fuel-cell-animate)
          )
        )

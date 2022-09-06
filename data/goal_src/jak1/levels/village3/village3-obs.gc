@@ -14,7 +14,7 @@
 (import "goal_src/jak1/import/medres-ogre2-ag.gc")
 (import "goal_src/jak1/import/medres-ogre3-ag.gc")
 (import "goal_src/jak1/import/gondolacables-ag.gc")
-
+(define s73-1 #f)
 (defskelgroup *med-res-ogre-sg* medres-ogre medres-ogre-lod0-jg medres-ogre-idle-ja
               ((medres-ogre-lod0-mg (meters 999999)))
               :bounds (static-spherem -200 0 -450 350)
@@ -43,8 +43,8 @@
   ()
   :heap-base #x70
   :method-count-assert 30
-  :size-assert         #xdc
-  :flag-assert         #x1e007000dc
+  :size-assert         #xd4
+  :flag-assert         #x1e007000d4
   )
 
 
@@ -69,8 +69,10 @@
     (set! (-> v1-2 global-scale) 3072.0)
     (set! (-> v1-2 waveform) ripple-for-villagec-lava)
     )
-  (logclear! (-> obj flags) (water-flags wt23))
-  (set! (-> obj flags) (logior (water-flags wt25) (-> obj flags)))
+  (dotimes (tgt-idx 4)
+    (logclear! (-> obj flags tgt-idx) (water-flags wt23))
+    (logior! (-> obj flags tgt-idx) (water-flags wt25))
+    )
   (set! (-> obj attack-event) 'lava)
   (none)
   )
@@ -102,6 +104,7 @@
   :virtual #t
   :code (behavior ((arg0 symbol))
     (set! (-> self state-time) (-> *display* base-frame-counter))
+    (set! s73-1 (string= (symbol->string (-> (level-get-target-inside *level*) name)) "snow"))
     (ja-channel-set! 1)
     (cond
       (arg0
@@ -168,9 +171,9 @@
               (s5-1 (vector<-cspace! (new 'stack-no-clear 'vector) (-> self node-list data 3)))
               )
           (cond
-            ((not (or s4-1 (task-closed? (game-task village3-button) (task-status need-hint))))
+            ((not(or s73-1(or s4-1 (task-closed? (game-task village3-button) (task-status need-hint)))))
              )
-            ((and (< (the int (-> *game-info* fuel)) (+ s3-0 2)) (< (the int (-> *game-info* fuel)) 71) (not s4-1))
+            ((and (< (the int (-> *game-info* fuel)) (+ s3-0 2)) (< (the int (-> *game-info* fuel)) 71) (not (or s4-1 s73-1)))
              (level-hint-spawn
                (game-text-id gondola-need-cells)
                "asstvb75"

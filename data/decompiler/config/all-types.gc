@@ -1030,7 +1030,7 @@
   (sidekick-hint-rounddoor #x23c)
   (sidekick-hint-lurkerm #x23d)
   (sidekick-hint-tower #x23e)
-  
+
   (sidekick-reminder-fish #x240)
 
   (firecanyon-need-cells #x24f)
@@ -1609,6 +1609,7 @@
   (hint-0                       #x1300)
   (hint-511                     #x14ff)
   (speedrunner-mode             #x1500)
+  (cutscene-skips               #x1501)
 ;; GAME-TEXT-ID ENUM ENDS
   )
 
@@ -5088,7 +5089,6 @@
 (define-extern spheres-overlap? (function sphere sphere symbol))
 (define-extern sphere<-vector! (function sphere vector sphere))
 (define-extern sphere<-vector+r! (function sphere vector float sphere))
-(define-extern rand-vu-sphere-point! (function vector float vector)) ;; todo
 
 ;; - Symbols
 
@@ -9784,27 +9784,27 @@
   :flag-assert         #x1d00000144
   ;; field dummy is a basic loaded with a signed load
   (:methods
-    (initialize! (_type_ symbol game-save string) _type_ 9)
-    (adjust (_type_ symbol float handle) float 10)
-    (task-complete? (_type_ game-task) symbol 11)
-    (lookup-entity-perm-by-aid (_type_ actor-id) entity-perm 12)
-    (get-entity-task-perm (_type_ game-task) entity-perm 13)
-    (copy-perms-from-level! (_type_ level) none 14)
-    (copy-perms-to-level! (_type_ level) none 15)
-    (debug-print (_type_ symbol) _type_ 16)
-    (get-or-create-continue! (_type_) continue-point 17)
-    (get-continue-by-name (_type_ string) continue-point 18)
-    (set-continue! (_type_ basic) continue-point 19)
-    (buzzer-count (_type_ game-task) int 20)
-    (seen-text? (_type_ game-text-id) symbol 21)
-    (mark-text-as-seen (_type_ game-text-id) none 22)
-    (got-buzzer? (_type_ game-task int) symbol 23)
-    (save-game! (_type_ game-save string) none 24)
-    (load-game! (_type_ game-save) game-save 25)
-    (clear-text-seen! (_type_ game-text-id) none 26)
-    (get-death-count (_type_ symbol) int 27)
-    (get-health-percent-lost (_type_ symbol) float 28)
-    )
+   (initialize! (_type_ symbol game-save string) _type_ 9)
+   (adjust (_type_ symbol float handle) float 10)
+   (task-complete? (_type_ game-task) symbol 11)
+   (lookup-entity-perm-by-aid (_type_ actor-id) entity-perm 12)
+   (get-entity-task-perm (_type_ game-task) entity-perm 13)
+   (copy-perms-from-level! (_type_ level) none 14)
+   (copy-perms-to-level! (_type_ level) none 15)
+   (debug-print (_type_ symbol) _type_ 16)
+   (get-or-create-continue! (_type_) continue-point 17)
+   (get-continue-by-name (_type_ string) continue-point 18)
+   (set-continue! (_type_ basic) continue-point 19)
+   (buzzer-count (_type_ game-task) int 20)
+   (seen-text? (_type_ game-text-id) symbol 21)
+   (mark-text-as-seen (_type_ game-text-id) none 22)
+   (got-buzzer? (_type_ game-task int) symbol 23)
+   (save-game! (_type_ game-save string) none 24)
+   (load-game! (_type_ game-save) game-save 25)
+   (clear-text-seen! (_type_ game-text-id) none 26)
+   (get-death-count (_type_ symbol) int 27)
+   (get-health-percent-lost (_type_ symbol) float 28)
+   )
   )
 
 ;; - Symbols
@@ -15781,8 +15781,10 @@
   (aspect-native)
   (button-music)
   (button-flava)
+  (use-random-seed?)
   (cheat-toggle)
   (monitor)
+  (rng-lib)
   )
 
 (defenum game-option-menu
@@ -18887,7 +18889,6 @@
 
 ;; - Unknowns
 
-;;(define-extern sky-base-polygons object) ;; unknown type
 (define-extern sky-base-polygons (inline-array sky-vertex))
 
 
@@ -34942,3 +34943,13 @@
 
 (define-extern cavecrystal-light-control-cavegeyserrock-callback (function (pointer process-drawable) int float object vector none))
 
+;; ----------------------
+;; File - knuth-rand
+;; Source Path - pc/util/knuth-rand.gc
+
+(define-extern mod-rand-next-float (function float))
+(define-extern mod-rand-float-range (function float float float))
+(define-extern mod-rand-percent? (function float symbol))
+(define-extern mod-rand-int-range (function int int int))
+(define-extern mod-rand-int-count (function int int))
+(define-extern mod-rand-sphere-point! (function vector float vector))

@@ -199,6 +199,8 @@
   ("pc-anim-util.o" "pc-anim-util") ;; added
   ("autosplit-h.o" "autosplit-h") ;; added
   ("autosplit.o" "autosplit") ;; added
+  ("speedruns-h.o" "speedruns-h") ;; added
+  ("speedruns.o" "speedruns") ;; added
   ("pckernel.o" "pckernel") ;; added
   ("mood-tables.o" "mood-tables")
   ("mood.o" "mood")
@@ -271,11 +273,16 @@
   ("water.o" "water")
   ("collectables-part.o" "collectables-part")
   ("collectables.o" "collectables")
+  ("mods-common.o" "mods-common")
+  ("checkpoint-randomizer.o" "checkpoint-randomizer")
+  ("jak-size.o" "jak-size")
+  ("localmulti.o" "localmulti")
   ("task-control.o" "task-control")
   ("process-taskable.o" "process-taskable")
   ("pov-camera.o" "pov-camera")
   ("powerups.o" "powerups")
   ("crates.o" "crates")
+  ("moving-items-library.o" "moving-items-library")
   ("hud.o" "hud")
   ("hud-classes.o" "hud-classes")
   ("progress-static.o" "progress-static")

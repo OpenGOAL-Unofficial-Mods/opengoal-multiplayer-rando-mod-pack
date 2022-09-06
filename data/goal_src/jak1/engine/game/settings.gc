@@ -400,8 +400,10 @@
     (set! (-> *level* border?) (-> gp-0 border-mode))
     ;; common pool texture page mask
     (set! (-> *texture-pool* common-page-mask) (-> gp-0 common-page))
-    (set! (-> *cpad-list* cpads 0 buzz) (-> gp-0 vibration))
-    
+    (dotimes (pad-idx (-> *cpad-list* num-cpads))
+      (set! (-> *cpad-list* cpads pad-idx buzz) (-> gp-0 vibration))
+      )
+
     (case (-> gp-0 ocean-off) 
           ((#t)
            (set! *ocean-off* #t)

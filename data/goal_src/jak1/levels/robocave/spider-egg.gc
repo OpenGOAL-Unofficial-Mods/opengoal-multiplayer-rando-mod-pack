@@ -77,13 +77,13 @@
     (none)
     )
   :code (behavior ((arg0 symbol))
-    (let ((f30-0 (rand-vu-float-range 0.8 1.2)))
+    (let ((f30-0 (mod-rand-float-range 0.8 1.2)))
       (cond
         (arg0
           (ja-channel-set! 1)
           (ja-no-eval :group! spider-egg-idle-ja
                       :num! (seek! max f30-0)
-                      :frame-num (rand-vu-float-range 0.0 (the float (+ (-> (ja-group) data 0 length) -1)))
+                      :frame-num (mod-rand-float-range 0.0 (the float (+ (-> (ja-group) data 0 length) -1)))
                       )
           (until (ja-done? 0)
             (suspend)
@@ -95,7 +95,7 @@
           )
         )
       (loop
-        (let ((gp-2 (rand-vu-int-range 2 6)))
+        (let ((gp-2 (mod-rand-int-range 2 6)))
           (dotimes (s5-0 gp-2)
             (ja-no-eval :group! spider-egg-idle-ja :num! (seek! max f30-0) :frame-num 0.0)
             (until (ja-done? 0)
@@ -249,15 +249,15 @@
   (set! (-> obj root-override trans y) (+ -409.6 (-> obj root-override trans y)))
   (let ((s4-1 (new 'stack-no-clear 'vector)))
     (set! (-> s4-1 quad) (-> obj root-override surface-normal quad))
-    (+! (-> s4-1 x) (rand-vu-float-range -0.2 0.2))
-    (+! (-> s4-1 z) (rand-vu-float-range -0.2 0.2))
+    (+! (-> s4-1 x) (mod-rand-float-range -0.2 0.2))
+    (+! (-> s4-1 z) (mod-rand-float-range -0.2 0.2))
     (vector-normalize! s4-1 1.0)
     (quaternion-axis-angle!
       (-> obj root-override quat)
       (-> s4-1 x)
       (-> s4-1 y)
       (-> s4-1 z)
-      (rand-vu-float-range 0.0 65536.0)
+      (mod-rand-float-range 0.0 65536.0)
       )
     )
   (update-transforms! (-> obj root-override))

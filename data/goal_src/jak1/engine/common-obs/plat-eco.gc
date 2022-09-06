@@ -144,11 +144,11 @@
                      (a1-3 (-> (the-as collide-shape v1-6) root-prim prim-core))
                      (f30-0 (vector-vector-distance (the-as vector s5-0) (the-as vector a1-3)))
                      )
-                (when (rand-vu-percent? 0.5)
+                (when (mod-rand-percent? 0.5)
                   (let ((gp-2 (new 'stack-no-clear 'vector)))
                     (set! (-> gp-2 quad) (-> s5-0 world-sphere quad))
                     (dotimes (s5-1 3)
-                      (+! (-> gp-2 data s5-1) (rand-vu-float-range -5324.8 5324.8))
+                      (+! (-> gp-2 data s5-1) (mod-rand-float-range -5324.8 5324.8))
                       )
                     (eco-blue-glow gp-2)
                     )
@@ -157,8 +157,8 @@
                 (activate!
                   (-> self smush)
                   (lerp-scale
-                    (rand-vu-float-range 1.1 1.3)
-                    (rand-vu-float-range 1.0 1.02)
+                    (mod-rand-float-range 1.1 1.3)
+                    (mod-rand-float-range 1.0 1.02)
                     f30-0
                     (-> *FACT-bank* suck-suck-dist)
                     (-> *FACT-bank* suck-bounce-dist)

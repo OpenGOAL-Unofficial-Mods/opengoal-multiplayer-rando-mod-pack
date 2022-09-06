@@ -108,7 +108,7 @@
   (with-pp
     (cond
       ((> (-> obj curve num-cverts) 0)
-       (let ((s4-0 (rand-vu-int-count (-> obj curve num-cverts))))
+       (let ((s4-0 (mod-rand-int-count (-> obj curve num-cverts))))
          (when *run-time-assert-enable*
            (set-pos *__private-assert-info* "path" (the-as uint 83) (the-as uint 6))
            (__assert-zero-lim-range-int s4-0 (-> obj curve num-cverts) "rand-index" "(-> obj num-cverts)")

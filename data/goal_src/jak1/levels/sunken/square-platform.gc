@@ -218,7 +218,7 @@
                                      (s0-0 (new-sound-id))
                                      )
                                  (set! sv-48 1024)
-                                 (let ((a3-0 (the int (* 1524.0 (rand-vu-float-range -0.8 0.8))))
+                                 (let ((a3-0 (the int (* 1524.0 (mod-rand-float-range -0.8 0.8))))
                                        (t0-0 0)
                                        (t1-0 1)
                                        (t2-0 #t)

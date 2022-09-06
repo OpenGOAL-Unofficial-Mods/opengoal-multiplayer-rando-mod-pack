@@ -556,7 +556,7 @@
          )
     (init-vf0-vector)
     (let ((s3-0 (new 'stack-no-clear 'matrix))
-          (f30-0 (rand-vu-float-range (-> arg1 user-float) (+ 65536.0 (-> arg1 user-float))))
+          (f30-0 (mod-rand-float-range (-> arg1 user-float) (+ 65536.0 (-> arg1 user-float))))
           (s2-0 (new 'stack-no-clear 'vector))
           )
       (set! (-> s2-0 x) 116940.8)

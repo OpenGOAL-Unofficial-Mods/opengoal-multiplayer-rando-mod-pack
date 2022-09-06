@@ -472,9 +472,9 @@
     ;; only update if enough time has passed.
     (set! (-> obj start-time) (-> *display* base-frame-counter))
     ;; come up with a random end time.
-    (set! (-> obj timer) (rand-vu-int-range (-> obj min-time) (-> obj max-time)))
+    (set! (-> obj timer) (mod-rand-int-range (-> obj min-time) (-> obj max-time)))
     ;; come up with a random value in (-max, max)
-    (set! (-> obj value) (rand-vu-float-range (- (-> obj max-val)) (-> obj max-val)))
+    (set! (-> obj value) (mod-rand-float-range (- (-> obj max-val)) (-> obj max-val)))
     )
   (-> obj value)
   )
@@ -588,10 +588,10 @@
 (defmethod update-now! delayed-rand-vector ((obj delayed-rand-vector))
   "update to a random value now"
   (set! (-> obj start-time) (-> *display* base-frame-counter))
-  (set! (-> obj timer) (rand-vu-int-range (-> obj min-time) (-> obj max-time)))
-  (set! (-> obj value x) (rand-vu-float-range (- (-> obj xz-max)) (-> obj xz-max)))
-  (set! (-> obj value y) (rand-vu-float-range (- (-> obj y-max)) (-> obj y-max)))
-  (set! (-> obj value z) (rand-vu-float-range (- (-> obj xz-max)) (-> obj xz-max)))
+  (set! (-> obj timer) (mod-rand-int-range (-> obj min-time) (-> obj max-time)))
+  (set! (-> obj value x) (mod-rand-float-range (- (-> obj xz-max)) (-> obj xz-max)))
+  (set! (-> obj value y) (mod-rand-float-range (- (-> obj y-max)) (-> obj y-max)))
+  (set! (-> obj value z) (mod-rand-float-range (- (-> obj xz-max)) (-> obj xz-max)))
   (-> obj value)
   )
 

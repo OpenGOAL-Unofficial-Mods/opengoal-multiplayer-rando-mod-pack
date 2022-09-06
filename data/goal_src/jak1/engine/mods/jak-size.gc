@@ -1,0 +1,68 @@
+;;-*-Lisp-*-
+(in-package goal)
+
+;; name: jak-size.gc
+;; name in dgo: main
+;; dgos: GAME, ENGINE
+
+(defun jak-size-run-each-frame()
+;;Jak size stuff move to seperate file soontm
+(if (and (= (-> (-> (the-as target *target* )root)scale y) 1.0) (-> *challenges-settings* challenges-smalljak?))
+(begin
+(send-event *target* 'sidekick #f)
+(set! (-> (-> (the-as target *target* )root)scale x) 0.3)
+(set! (-> (-> (the-as target *target* )root)scale y) 0.3)
+(set! (-> (-> (the-as target *target* )root)scale z) 0.3)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale y) 0.3) (not(-> *challenges-settings* challenges-smalljak?)))
+(begin
+(send-event *target* 'sidekick #t)
+(set! (-> (-> (the-as target *target* )root)scale x) 1.0)
+(set! (-> (-> (the-as target *target* )root)scale y) 1.0)
+(set! (-> (-> (the-as target *target* )root)scale z) 1.0)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale y) 1.0) (-> *challenges-settings* challenges-bigjak?))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale x) 2.0)
+(set! (-> (-> (the-as target *target* )root)scale y) 2.0)
+(set! (-> (-> (the-as target *target* )root)scale z) 2.0)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale y) 2.0) (not(-> *challenges-settings* challenges-bigjak?)))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale x) 1.0)
+(set! (-> (-> (the-as target *target* )root)scale y) 1.0)
+(set! (-> (-> (the-as target *target* )root)scale z) 1.0)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale x) 1.0) (-> *challenges-settings* challenges-flatjak?))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale x) 0.1)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale x) 0.1) (not(-> *challenges-settings* challenges-flatjak?)))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale x) 1.0)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale z) 1.0) (-> *challenges-settings* challenges-paperjak?))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale z) 0.1)
+)
+)
+
+(if (and (= (-> (-> (the-as target *target* )root)scale z) 0.1) (not(-> *challenges-settings* challenges-paperjak?)))
+(begin
+(set! (-> (-> (the-as target *target* )root)scale z) 1.0)
+)
+)
+(none)
+)

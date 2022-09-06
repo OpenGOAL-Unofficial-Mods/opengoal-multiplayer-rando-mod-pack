@@ -1292,7 +1292,7 @@
   )
 
 (defun birth-func-random-next-time ((arg0 sparticle-system) (arg1 sparticle-cpuinfo) (arg2 sprite-vec-data-3d) (arg3 sparticle-launcher) (arg4 sparticle-launch-state))
-  (set! (-> arg1 next-time) (the-as uint (the int (rand-vu-float-range 0.0 (-> arg1 user-float)))))
+  (set! (-> arg1 next-time) (the-as uint (the int (mod-rand-float-range 0.0 (-> arg1 user-float)))))
   0
   (none)
   )

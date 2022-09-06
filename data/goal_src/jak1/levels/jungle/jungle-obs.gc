@@ -692,7 +692,7 @@
     (sound-play "blue-eco-on" :position (the-as symbol (-> self root-override trans)))
     (ja-no-eval :group! (-> self draw art-group data 3) :num! (seek! max 0.25) :frame-num 0.0)
     (until (ja-done? 0)
-      (if (rand-vu-percent? 0.1)
+      (if (mod-rand-percent? 0.1)
           (spawn-projectile-blue *target*)
           )
       (suspend)
@@ -1020,7 +1020,7 @@
     (set! (-> self root-override root-prim prim-core offense) (collide-offense no-offense))
     (while (not (ja-max? 0))
       (ja :num! (seek! max 2.0))
-      (if (and (not arg0) (rand-vu-percent? 0.2))
+      (if (and (not arg0) (mod-rand-percent? 0.2))
           (spawn-projectile-blue *target*)
           )
       (suspend)
@@ -1211,8 +1211,8 @@
   ()
   :heap-base #x70
   :method-count-assert 30
-  :size-assert         #xdc
-  :flag-assert         #x1e007000dc
+  :size-assert         #xd4
+  :flag-assert         #x1e007000d4
   )
 
 

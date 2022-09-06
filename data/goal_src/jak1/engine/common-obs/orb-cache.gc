@@ -19,11 +19,12 @@
    (root-pos          float     :offset-assert 1204)
    (money             int32     :offset-assert 1208)
    (activated         symbol    :offset-assert 1212)
+   (initial-money     int32     :offset-assert 1216)
    )
-  :heap-base #x450
+  :heap-base #x460
   :method-count-assert 29
-  :size-assert         #x4c0
-  :flag-assert         #x1d045004c0
+  :size-assert         #x4c4
+  :flag-assert         #x1d046004c4
   (:methods
     (pos-logic (_type_ symbol) symbol 27)
     (calculate-pos (_type_ symbol) none 28)
@@ -122,22 +123,35 @@
   )
 
 (defmethod pos-logic orb-cache-top ((obj orb-cache-top) (arg0 symbol))
-  (dotimes (s4-0 (-> obj money))
-    (when (not (handle->process (-> obj money-list s4-0)))
-      (dotimes (v1-6 (-> obj money))
-        (when (< s4-0 v1-6)
-          (set! (-> obj money-list (+ v1-6 -1)) (-> obj money-list v1-6))
-          (set! (-> obj money-pos-actual (+ v1-6 -1)) (-> obj money-pos-actual v1-6))
+  (let ((orbs-collected? #f))
+    (dotimes (s4-0 (-> obj money))
+      (when (not (handle->process (-> obj money-list s4-0)))
+        (dotimes (v1-6 (-> obj money))
+          (when (< s4-0 v1-6)
+            (set! (-> obj money-list (+ v1-6 -1)) (-> obj money-list v1-6))
+            (set! (-> obj money-pos-actual (+ v1-6 -1)) (-> obj money-pos-actual v1-6))
+            )
+          )
+        (+! (-> obj money) -1)
+        (set! orbs-collected? #t)
+        (calculate-pos obj arg0)
+        (+! s4-0 -1)
+        (let ((v1-15 (-> obj entity extra perm)))
+          (logior! (-> v1-15 status) (entity-perm-status user-set-from-cstage))
+          (+! (-> v1-15 user-int16 0) 1)
           )
         )
-      (+! (-> obj money) -1)
-      (calculate-pos obj arg0)
-      (+! s4-0 -1)
-      (let ((v1-15 (-> obj entity extra perm)))
-        (logior! (-> v1-15 status) (entity-perm-status user-set-from-cstage))
-        (+! (-> v1-15 user-int16 0) 1)
-        )
       )
+      ;; if we collected orbs and now there are no more, give credit for the total orbs in this cache
+      (when (and
+            orbs-collected?
+            (zero? (-> obj money))
+            (-> *randomizer-settings* checkpoint-randomizer?)
+            (-> *randomizer-settings* warp-on-orb?)
+          )
+          (format 0 "RANDOMIZER: got ~D orbs from cache, checking warp~%" (-> obj initial-money))
+          (orchestrateCheckpointWarp (-> obj initial-money))
+        )
     )
   (let ((s4-1 (new 'stack-no-clear 'vector))
         (s5-1 #t)
@@ -339,6 +353,7 @@
     (logior! (-> v1-39 status) (entity-perm-status user-set-from-cstage))
     (set! (-> obj money) (- (-> obj money) (-> v1-39 user-int16 0)))
     )
+  (set! (-> obj initial-money) (-> obj money))
   (dotimes (v1-42 (-> obj money))
     (set! (-> obj money-list v1-42) (the-as handle #f))
     )

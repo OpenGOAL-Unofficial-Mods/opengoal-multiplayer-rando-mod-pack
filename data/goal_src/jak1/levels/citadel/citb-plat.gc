@@ -501,7 +501,7 @@
             (send-event *target* 'query 'powerup (pickup-type eco-blue))
             )
        (when (< (- (-> *display* base-frame-counter) (-> self state-time)) (seconds 1))
-         (if (rand-vu-percent? 0.05)
+         (if (mod-rand-percent? 0.05)
              (spawn-projectile-blue *target*)
              )
          )

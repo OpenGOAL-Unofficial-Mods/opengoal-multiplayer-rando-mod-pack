@@ -115,6 +115,7 @@
   (contf09)
   (game-start)
   (sage-ecorocks)
+  (additional-disabled)
   )
 
 ;; static data for a continue point
@@ -192,10 +193,14 @@
    (death-pos             vector-array                  :offset-assert 312)
    (dummy                 basic                         :offset-assert 316)
    (auto-save-count       int32                         :offset-assert 320)
+   (green-eco-total       float                         :offset-assert 324)
+   (blue-eco-total        float                         :offset-assert 328)
+   (red-eco-total         float                         :offset-assert 332)
+   (yellow-eco-total      float                         :offset-assert 336)
    )
   :method-count-assert 29
-  :size-assert         #x144
-  :flag-assert         #x1d00000144
+  :size-assert         #x154
+  :flag-assert         #x1d00000154
   (:methods
    (initialize! (_type_ symbol game-save string) _type_ 9)
    (adjust (_type_ symbol float handle) float 10)

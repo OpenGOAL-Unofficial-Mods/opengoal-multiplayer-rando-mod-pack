@@ -649,6 +649,86 @@
     )
   )
 
+(defun string->uint ((str string))
+  "String to uint. Supports binary, hex, and decimal. Negative is implemented for decimal and hex
+   But I think it's broken?"
+  (let ((str-ptr (-> str data))
+        (result (the uint 0))
+        (negative #f)
+        )
+    (cond
+      ((= (-> str-ptr 0) 35)
+       ;; starts with #.
+       (let ((next-char-1 (&-> str-ptr 1)))
+         (cond
+           ((or (= (-> next-char-1 0) 120) (= (-> next-char-1 0) 88))
+            ;; starts with #x or #X
+            (let ((next-char-2 (&-> next-char-1 1)))
+              (when (= (-> next-char-2 1) 45)
+                ;; negate!
+                (set! negative #t)
+                (set! next-char-2 (&-> next-char-2 1))
+                )
+              (while (or
+                       (and (>= (-> next-char-2 0) (the-as uint 48)) (>= (the-as uint 57) (-> next-char-2 0)))
+                       (and (>= (-> next-char-2 0) (the-as uint 65)) (>= (the-as uint 70) (-> next-char-2 0)))
+                       (and (>= (-> next-char-2 0) (the-as uint 97)) (>= (the-as uint 102) (-> next-char-2 0)))
+                       )
+                (cond
+                  ((and (>= (-> next-char-2 0) (the-as uint 65)) (>= (the-as uint 70) (-> next-char-2 0)))
+                    ;; is in [A-F]
+                   (set! result (the-as uint (+ (-> next-char-2 0) -55 (imul64 result 16))))
+                   )
+                  ((and (>= (-> next-char-2 0) (the-as uint 97)) (>= (the-as uint 102) (-> next-char-2 0)))
+                    ;; is in [a-f]
+                   (set! result (the-as uint (+ (-> next-char-2 0) -87 (imul64 result 16))))
+                   )
+                  (else
+                    ;; is in [0-9]
+                    (set! result (the-as uint (+ (-> next-char-2 0) -48 (imul64 result 16))))
+                    )
+                  )
+                (set! next-char-2 (&-> next-char-2 1))
+                )
+              )
+            )
+           ((or (= (-> next-char-1 0) 98) (= (-> next-char-1 0) 66))
+            ;; is #b (I guess we can't do negative binary?)
+            (let ((a0-4 (&-> next-char-1 1)))
+              (while (and (>= (-> a0-4 0) (the-as uint 48)) (>= (the-as uint 49) (-> a0-4 0)))
+                (set! result (the-as uint (+ (-> a0-4 0) -48 (imul64 result 2))))
+                (set! a0-4 (&-> a0-4 1))
+                )
+              )
+            )
+           )
+         )
+       )
+      (else
+        ;; decimal
+
+        ;; check for negative
+        (when (= (-> str-ptr 1) 45)
+          (set! negative #t)
+          (set! str-ptr (&-> str-ptr 1))
+          )
+        (while (and (>= (-> str-ptr 0) (the-as uint 48)) (>= (the-as uint 57) (-> str-ptr 0)))
+          (set! result (the-as uint (+ (-> str-ptr 0) -48 (imul64 10 result))))
+          (set! str-ptr (&-> str-ptr 1))
+          )
+        )
+      )
+    (cond
+      (negative
+        (- result)
+        )
+      (else
+        result
+        )
+      )
+    )
+  )
+
 (defun string->float ((str string))
   "Convert a string to a float, but it is not implemented."
   ;(format 0 "string->float left as an excersize for the reader~%")

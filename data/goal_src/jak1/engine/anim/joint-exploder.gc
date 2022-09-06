@@ -413,6 +413,7 @@
     (collide-kind background)
     obj
     (new 'static 'pat-surface :noentity #x1)
+    *collide-work*
     )
   (let ((gp-1 (-> obj joints))
         (v1-2 (-> arg0 head))
@@ -573,10 +574,10 @@
            (vector-! (-> s3-0 transv) (-> s3-0 mat vector 3) (-> obj tuning fountain-rand-transv-lo))
            (vector-normalize!
              (-> s3-0 transv)
-             (rand-vu-float-range (-> obj tuning fountain-rand-transv-hi x) (-> obj tuning fountain-rand-transv-hi y))
+             (mod-rand-float-range (-> obj tuning fountain-rand-transv-hi x) (-> obj tuning fountain-rand-transv-hi y))
              )
            (+! (-> s3-0 transv y)
-               (rand-vu-float-range (-> obj tuning fountain-rand-transv-hi z) (-> obj tuning fountain-rand-transv-hi w))
+               (mod-rand-float-range (-> obj tuning fountain-rand-transv-hi z) (-> obj tuning fountain-rand-transv-hi w))
                )
            (set! (-> s3-0 transv w) 1.0)
            )
@@ -586,9 +587,9 @@
                   )
               (set-vector!
                 (-> s3-0 transv)
-                (rand-vu-float-range (-> s1-1 x) (-> s2-1 x))
-                (rand-vu-float-range (-> s1-1 y) (-> s2-1 y))
-                (rand-vu-float-range (-> s1-1 z) (-> s2-1 z))
+                (mod-rand-float-range (-> s1-1 x) (-> s2-1 x))
+                (mod-rand-float-range (-> s1-1 y) (-> s2-1 y))
+                (mod-rand-float-range (-> s1-1 z) (-> s2-1 z))
                 1.0
                 )
               )

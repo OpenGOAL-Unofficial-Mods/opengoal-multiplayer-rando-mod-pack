@@ -14,11 +14,12 @@
 (deftype springbox (process-drawable)
   ((spring-height meters  :offset-assert 176)
    (smush         float   :offset-assert 180)
+   (cur-target    target  :offset-assert 184)
    )
   :heap-base #x50
   :method-count-assert 20
-  :size-assert         #xb8
-  :flag-assert         #x14005000b8
+  :size-assert         #xbc
+  :flag-assert         #x14005000bc
   (:states
     bouncer-fire
     bouncer-smush
@@ -40,6 +41,7 @@
       (('bonk)
        (when (send-event arg0 'jump (-> self spring-height) (-> self spring-height) #f)
          (sound-play "trampoline")
+         (set! (-> self cur-target) (the-as target arg0))
          (go bouncer-fire)
          )
        )
@@ -50,6 +52,7 @@
        )
       (('attack)
        (when (and (= (-> arg3 param 1) 'flop) (send-event arg0 'jump (-> self spring-height) (-> self spring-height) #f))
+         (set! (-> self cur-target) (the-as target arg0))
          (go bouncer-fire)
          #f
          )
@@ -109,12 +112,13 @@
 
 (defstate bouncer-fire (springbox)
   :code (behavior ()
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 178 (seconds 0.1))
+    (cpad-set-buzz! (-> self cur-target control unknown-cpad-info00) 1 178 (seconds 0.1))
     (ja-no-eval :group! (-> self draw art-group data 2) :num! (seek!) :frame-num (ja-aframe 6.0 0))
     (until (ja-done? 0)
       (suspend)
       (ja :num! (seek!))
       )
+    (set! (-> self cur-target) #f)
     (go bouncer-wait)
     (none)
     )
@@ -140,6 +144,7 @@
     (set! (-> s4-0 nav-radius) (* 0.75 (-> s4-0 root-prim local-sphere w)))
     (backup-collide-with-as s4-0)
     (set! (-> obj root) s4-0)
+    (set! (-> obj cur-target) #f)
     )
   (process-drawable-from-entity! obj arg0)
   (initialize-skeleton obj *bouncer-sg* '())

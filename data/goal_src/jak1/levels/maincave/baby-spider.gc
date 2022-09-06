@@ -252,7 +252,7 @@ baby-spider-default-event-handler
   )
 
 (defmethod dummy-51 baby-spider ((obj baby-spider))
-  (let* ((f0-0 (rand-vu-float-range 0.0 1.0))
+  (let* ((f0-0 (mod-rand-float-range 0.0 1.0))
          (f1-1 (+ 1.0 (* 2.0 f0-0)))
          (f2-2 f1-1)
          (f2-4 (/ 1.0 f2-2))
@@ -460,7 +460,7 @@ baby-spider-default-event-handler
     (set! (-> self target-nav-time) (-> *display* base-frame-counter))
     (set! (-> self wiggle-time) (+ (-> *display* base-frame-counter) (seconds -10)))
     (set! (-> self wiggle-angle) 0.0)
-    (set! (-> self chase-rest-time) (rand-vu-int-range (seconds 1) (seconds 4)))
+    (set! (-> self chase-rest-time) (mod-rand-int-range (seconds 1) (seconds 4)))
     (ja-channel-push! 1 (seconds 0.17))
     (ja :group! baby-spider-run-ja :num! min)
     (loop
@@ -514,7 +514,7 @@ baby-spider-default-event-handler
   :code (behavior ()
     (set! (-> self rotate-speed) 1456355.5)
     (set! (-> self turn-time) (seconds 0.075))
-    (let ((f30-0 (rand-vu-float-range 0.8 1.2)))
+    (let ((f30-0 (mod-rand-float-range 0.8 1.2)))
       (loop
         (logior! (-> self nav-enemy-flags) (nav-enemy-flags enable-travel))
         (ja-channel-push! 1 (seconds 0.1))
@@ -525,7 +525,7 @@ baby-spider-default-event-handler
           )
         (ja-no-eval :num! (loop!))
         (logclear! (-> self nav-enemy-flags) (nav-enemy-flags enable-travel))
-        (let ((gp-0 (rand-vu-int-range 300 600))
+        (let ((gp-0 (mod-rand-int-range 300 600))
               (s5-0 (-> *display* base-frame-counter))
               )
           (until (>= (- (-> *display* base-frame-counter) s5-0) gp-0)
@@ -700,7 +700,7 @@ baby-spider-default-event-handler
   (set! (-> obj wiggle-angle) 0.0)
   (set! (-> obj delta-wiggle-angle) 910.2222)
   (set! (-> obj wiggle-factor) 1.5)
-  (set! (-> obj reaction-time) (rand-vu-int-range (seconds 0.1) (seconds 0.8)))
+  (set! (-> obj reaction-time) (mod-rand-int-range (seconds 0.1) (seconds 0.8)))
   (set! (-> obj chase-rest-time) (seconds 1))
   (set! (-> obj up-vector quad) (-> *y-vector* quad))
   0

@@ -1720,14 +1720,15 @@
  "game/settings-h.gc"
  )
 
-(goal-src "pc/util/knuth-rand.gc" "settings-h")
+(goal-src "pc/util/knuth-rand.gc" "settings-h" "vector-h")
 
 (goal-src-sequence
  ;; prefix
  "engine/"
 
  :deps
- ("$OUT/obj/settings-h.o")
+ ("$OUT/obj/settings-h.o"
+  "$OUT/obj/knuth-rand.o")
 
  "util/capture.gc"
  "debug/memory-usage-h.gc"
@@ -1941,7 +1942,8 @@
 
  :deps
  ("$OUT/obj/main.o"
-  "$OUT/obj/video.o")
+  "$OUT/obj/video.o"
+  "$OUT/obj/water-h.o")
 
  "collide/collide-cache.gc"
  "entity/relocate.gc"
@@ -1954,12 +1956,19 @@
  "game/effect-control.gc"
  "common-obs/water.gc"
  "common-obs/collectables-part.gc"
+ "game/projectiles.gc"
+ "common-obs/baseplat.gc"
+ "mods/mods-common.gc"
+ "mods/checkpoint-randomizer.gc"
+ "mods/jak-size.gc"
+ "mods/localmulti.gc"
  "common-obs/collectables.gc"
  "game/task/task-control.gc"
  "common-obs/process-taskable.gc"
  "camera/pov-camera.gc"
  "game/powerups.gc"
  "common-obs/crates.gc"
+ "mods/moving-items-library.gc"
  "ui/hud.gc"
  "ui/hud-classes.gc"
  "ui/progress/progress-static.gc"
@@ -1967,7 +1976,6 @@
  "ui/progress/progress-draw.gc"
  "ui/progress/progress.gc"
  "ui/credits.gc"
- "game/projectiles.gc"
  "gfx/ocean/ocean.gc"
  "gfx/ocean/ocean-vu0.gc"
  "gfx/ocean/ocean-texture.gc"
@@ -1989,7 +1997,6 @@
  "common-obs/rigid-body.gc"
  "common-obs/nav-enemy-h.gc"
  "common-obs/nav-enemy.gc"
- "common-obs/baseplat.gc"
  "common-obs/basebutton.gc"
  "common-obs/tippy.gc"
  "anim/joint-exploder.gc"
@@ -2039,9 +2046,11 @@
 ;; Custom or Modified Code
 (goal-src "pc/features/autosplit-h.gc")
 (goal-src "pc/features/autosplit.gc" "autosplit-h" "task-control-h")
+(goal-src "pc/features/speedruns-h.gc")
+(goal-src "pc/features/speedruns.gc" "speedruns-h" "autosplit-h")
 (goal-src "pc/pckernel-h.gc" "dma-buffer")
 (goal-src "pc/util/pc-anim-util.gc" "target-h")
-(goal-src "pc/pckernel.gc" "pc-anim-util" "settings" "video" "target-h" "autosplit-h")
+(goal-src "pc/pckernel.gc" "pc-anim-util" "settings" "video" "target-h" "autosplit-h" "speedruns-h")
 (goal-src "pc/subtitle.gc" "text" "pckernel" "hint-control" "loader-h" "gsound" "ambient")
 (goal-src "pc/progress-pc.gc" "progress" "pckernel")
 (goal-src "pc/util/anim-tester-x.gc" "pckernel" "gstring" "joint" "process-drawable" "art-h" "effect-control")

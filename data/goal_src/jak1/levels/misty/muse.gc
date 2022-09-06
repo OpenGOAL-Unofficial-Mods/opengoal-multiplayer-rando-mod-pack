@@ -149,7 +149,7 @@
 
 (defmethod dummy-51 muse ((obj muse))
   (dotimes (s5-0 2)
-    (let ((v1-2 (rand-vu-int-range 3 (+ (-> obj node-list length) -1))))
+    (let ((v1-2 (mod-rand-int-range 3 (+ (-> obj node-list length) -1))))
       (launch-particles (-> *part-id-table* 271) (vector<-cspace! (new 'stack-no-clear 'vector) (-> obj node-list data v1-2)))
       )
     )

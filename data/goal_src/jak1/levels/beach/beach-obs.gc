@@ -615,8 +615,8 @@
         (set-vector! s4-0 (+ (-> s5-1 x) (-> s3-0 x)) (-> s5-1 y) (+ (-> s5-1 z) (-> s3-0 z)) 1.0)
         (vector-float*! s3-0 s3-0 10.0)
         (spawn-flying-rock s4-0 s3-0 1.0 (-> self entity))
-        (let ((f20-0 (rand-vu-float-range 90.0 130.0))
-              (f24-0 (rand-vu-float-range 230.0 270.0))
+        (let ((f20-0 (mod-rand-float-range 90.0 130.0))
+              (f24-0 (mod-rand-float-range 230.0 270.0))
               )
           (let ((f22-0 (cos (* 182.04445 f20-0)))
                 (f0-14 (sin (* 182.04445 f20-0)))
@@ -767,6 +767,8 @@
           (-> self root-override)
           (-> self root-override transv)
           (collide-kind background)
+          *collide-cache*
+          *collide-work*
           )
         (quaternion*! (-> self root-override quat) (-> self root-override quat) (-> self tumble))
         (suspend)
@@ -791,6 +793,8 @@
         (-> self root-override)
         (-> self root-override transv)
         (collide-kind background)
+        *collide-cache*
+        *collide-work*
         )
       (let ((gp-2 (new 'stack-no-clear 'vector))
             (f30-1 (vector-length (-> self root-override transv)))
@@ -858,15 +862,15 @@
   (let ((s5-1 (new-stack-vector0)))
     (set-vector!
       s5-1
-      (rand-vu-float-range -1.0 1.0)
-      (rand-vu-float-range -1.0 1.0)
-      (rand-vu-float-range -1.0 1.0)
+      (mod-rand-float-range -1.0 1.0)
+      (mod-rand-float-range -1.0 1.0)
+      (mod-rand-float-range -1.0 1.0)
       1.0
       )
     (vector-normalize! s5-1 1.0)
-    (quaternion-vector-angle! (-> self tumble) s5-1 (rand-vu-float-range 0.0 1820.4445))
+    (quaternion-vector-angle! (-> self tumble) s5-1 (mod-rand-float-range 0.0 1820.4445))
     )
-  (quaternion-axis-angle! (-> self root-override quat) 0.0 1.0 0.0 (rand-vu-float-range 0.0 65536.0))
+  (quaternion-axis-angle! (-> self root-override quat) 0.0 1.0 0.0 (mod-rand-float-range 0.0 65536.0))
   (initialize-skeleton self *kickrock-sg* '())
   (set! (-> self root-override transv quad) (-> arg1 quad))
   (go flying-rock-rolling)

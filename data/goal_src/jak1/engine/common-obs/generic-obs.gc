@@ -2275,7 +2275,7 @@
         )
     (cond
       ((>= v1-1 7)
-       (let ((v1-2 (rand-vu-int-range 3 (+ v1-1 -1))))
+       (let ((v1-2 (mod-rand-int-range 3 (+ v1-1 -1))))
          (vector<-cspace! arg1 (-> arg0 node-list data v1-2))
          )
        )
@@ -2283,11 +2283,11 @@
        (vector+!
          arg1
          (the-as vector (-> (the-as collide-shape s4-0) root-prim prim-core))
-         (rand-vu-sphere-point! arg1 (-> (the-as collide-shape s4-0) root-prim prim-core world-sphere w))
+         (mod-rand-sphere-point! arg1 (-> (the-as collide-shape s4-0) root-prim prim-core world-sphere w))
          )
        )
       (else
-        (vector+! arg1 (-> arg0 root trans) (rand-vu-sphere-point! arg1 (-> arg0 draw bounds w)))
+        (vector+! arg1 (-> arg0 root trans) (mod-rand-sphere-point! arg1 (-> arg0 draw bounds w)))
         )
       )
     )

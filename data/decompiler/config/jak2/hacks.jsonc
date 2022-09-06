@@ -36,9 +36,7 @@
   "asm_functions_by_name": [
     // checking boxed type is different now - these make the cfg stuff sad
     "name=",
-    "joint-control-remap!",
     "(method 21 game-info)",
-    "(anon-function 2 cam-combiner)",
     "cspace-inspect-tree",
     "command-get-process",
     "command-get-trans",
@@ -60,12 +58,7 @@
     "(method 224 bot)",
     "(method 77 rapid-gunner)",
     // until loop without nop:
-    "(method 9 history)",
-    "history-print",
-    "history-draw",
     "(method 9 sparticle-launcher)",
-    "(method 18 tracking-spline)",
-    "cam-string-find-position-rel!",
     "cam-layout-entity-volume-info-create",
     "process-drawable-shock-skel-effect",
     "target-history-print",
@@ -132,12 +125,10 @@
     "(method 16 ocean)",
 
     // unknown bug
-    "joint-mod-polar-look-at-guts",
-    "(method 13 external-art-control)",
     "update-mood-copy-ctywide",
     "update-mood-copy-stadium",
     "update-mood-drillb",
-    "reset-target-tracking",
+    // "reset-target-tracking",
     "(anon-function 1 target)",
     "find-nearest-entity",
     "target-land-effect",
@@ -187,7 +178,19 @@
     "display-loop-main",
     "lookup-level-info",
     "(method 24 level-group)",
-    "(method 19 level-group)"
+    "(method 19 level-group)",
+    // script
+    "command-get-time",
+    "command-get-param",
+    "command-get-quoted-param",
+    "command-get-entity",
+    // default-menu
+    "dm-scene-load-pick-func",
+    "debug-menu-make-continue-sub-menu",
+    "debug-menu-make-from-template",
+    "debug-menu-context-make-default-menus",
+    "debug-menu-make-task-menu",
+    "(method 19 gui-control)"
   ],
 
   // If format is used with the wrong number of arguments,
@@ -197,10 +200,9 @@
   "bad_format_strings": {
     "~170h~5d~220h~5d~280h~5,,2f": 3,
     "~338h~5d~388h~5d~448h~5,,2f": 3,
-    "~1k~%": 0,
     "~30Htf: ~8D~134Hpr: ~8D~252Hsh: ~8D~370Hhd: ~8D~%": 4,
     "~30Hal: ~8D~131Hwa: ~8D~252Hsp: ~8D~370Hwp: ~8D~%": 4,
-    "~0Kload ~16S ~5S ~5DK  ~5,,2fs  ~5,,2fs~1K ~5,,0f k/s~%": 6
+    "ERROR: <asg> ~A in spool anim loop for ~A ~D, but not loaded.~": 3
   },
 
   "blocks_ending_in_asm_branch": {
@@ -218,8 +220,11 @@
 
     "real-main-draw-hook": [114, 115, 116, 118],
 
+    "sprite-draw-distorters": [4, 5],
+
     "(method 12 perf-stat)": [0],
-    "(method 11 perf-stat)": [0]
+    "(method 11 perf-stat)": [0],
+    "(method 22 gui-control)": [117, 121, 127, 128, 129, 139]
   },
 
   // Sometimes the game might use format strings that are fetched dynamically,
@@ -229,7 +234,11 @@
   // where "op" is the op number for the call to format.
   "dynamic_format_arg_counts": {},
 
-  "mips2c_functions_by_name": [],
+  "mips2c_functions_by_name": [
+    "collide-do-primitives",
+    "moving-sphere-triangle-intersect",
+    "calc-animation-from-spr"
+  ],
 
   "mips2c_jump_table_functions": {},
 

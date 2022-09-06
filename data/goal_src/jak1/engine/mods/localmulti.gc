@@ -1,0 +1,160 @@
+;;-*-Lisp-*-
+(in-package goal)
+
+;; name: localmulti.gc
+;; name in dgo: main
+;; dgos: GAME, ENGINE
+
+;;Spawn a new target process
+(defun start-extra-target ((idx int))
+  (process-spawn
+                target
+                :init init-target
+                  (-> *game-info* current-continue) idx
+                :from *target-dead-pool*
+                :to *target-pool*
+                :stack *kernel-dram-stack*
+                )
+  )
+
+;;These return true if the specified target is currently "alive".
+(defun target-alive? ((tgt target))
+  (and tgt 
+    (not (or (= (-> tgt state) #f) (= (-> tgt state) symbol)))
+    )
+  )
+
+(defun extra-target-alive? () 
+  (dotimes (tgt-idx (-> *target-list* length))
+    (if (and (> tgt-idx 0) (target-alive? (get-target tgt-idx)))
+      (return #t)
+      )
+    )
+  #f
+  )
+  
+;;Command to warp a target to another (normally to warp someone to main target to bring back on camera)
+(defun warp-jakA-to-jakB ((jakA target) (jakB target))
+      (set! (-> (-> jakA root) trans x) (-> (-> jakB root) trans x))
+      (set! (-> (-> jakA root) trans y) (-> (-> jakB root) trans y))
+      (set! (-> (-> jakA root) trans z) (-> (-> jakB root) trans z))
+)
+
+(defun check-multi-jak-dist ((jak target))
+  (define xyz-dist 0.0)
+  (define  xz-dist 0.0)
+  (define   y-dist 0.0)
+  (define j-vec (new 'static 'vector))
+  
+  (set! (-> j-vec x) (-> (-> jak root) trans x))
+  (set! (-> j-vec y) (-> (-> jak root) trans y))
+  (set! (-> j-vec z) (-> (-> jak root) trans z))
+
+  (set! xyz-dist (vector-vector-distance j-vec (target-pos 0)) )
+  (set!  xz-dist (vector-vector-xz-distance j-vec (target-pos 0)) )
+  (set!   y-dist (- (-> (target-pos 0) y) (-> j-vec y)) )
+
+  (> xyz-dist (meters 55.0))
+)
+
+(defun localmulti-run-eachframe()
+  ;;If the camera is not focus on the main target (id 1375524), then set the cameras focus to the  main target.
+  ;;todo this breaks pelican cutscene we can easily fix later.
+  (if (and (extra-target-alive?) (!= (-> *camera* drawable-target ) 1375524))
+    (set! (-> *camera* drawable-target) (the handle 1375524))
+    )
+
+  (cond
+    (racer?
+      ;; reset zoomer camera
+      (send-event *camera* 'change-state cam-string 0)
+      (send-event *camera* 'set-slave-option #x6000)
+      ;; despawn additional targets, if any
+      (dotimes (tgt-idx (-> *target-list* length))
+        (when (and (> tgt-idx 0) (get-target tgt-idx))
+          (deactivate (get-target tgt-idx))
+          (set! (-> *target-list* tgt-idx) (the-as handle #f))
+          )
+        )
+      )
+    (flutflut?
+      ;; despawn additional targets, if any
+      (dotimes (tgt-idx (-> *target-list* length))
+        (when (and (> tgt-idx 0) (get-target tgt-idx))
+          (deactivate (get-target tgt-idx))
+          (set! (-> *target-list* tgt-idx) (the-as handle #f))
+          )
+        )
+      )
+    ;;If the camera is not set to cam-stick, and we have more than one jak, then set it to cam-stick
+    ((and (extra-target-alive?) (= (-> (-> (-> (the-as (pointer camera-slave) (-> *camera* child))) state) name) 'cam-string))
+      (send-event *camera* 'change-state cam-stick 0)
+      )
+    )
+
+  ;;Warp side jaks to main Jak if too far
+  (dotimes (tgt-idx (-> *target-list* length))
+    (let ((tgt (get-target tgt-idx)))
+      (if (and (> tgt-idx 0) (target-alive? tgt) (check-multi-jak-dist tgt))
+        (warp-jakA-to-jakB tgt *target*)
+        )
+      )
+    )
+  
+  (none)
+  )
+
+(defun localmulti-start ((tgt-idx int))
+  (let ((tgt (get-target tgt-idx)))
+    (when (> tgt-idx 0)
+      (if (target-alive? tgt)
+        (begin
+          ;; despawn target
+          (deactivate tgt)
+          (set! (-> *target-list* tgt-idx) (the-as handle #f))
+          )
+        (begin
+          ;; spawn new target
+          (set! tgt (-> (start-extra-target tgt-idx) 0))
+          (set! (-> *target-list* tgt-idx) (process->handle tgt))
+          (case tgt-idx
+            ((1) (draw-green tgt))
+            ((2) (draw-red tgt))
+            ((3) (draw-blue tgt))
+            )
+          (set! (-> tgt control unknown-cpad-info00) (-> *cpad-list* cpads tgt-idx))
+          )
+        )
+      )
+    )
+  (none)
+  )
+
+;; Spawn targets up to and including target x
+(defun localmulti-start-all ((x int))
+  (dotimes (tgt-idx x)
+    (localmulti-start tgt-idx)
+    )
+  )
+
+;;This code is ran in main.gc in the same function that cheat-mode check is. When a player enters half debug code on a controller that isnt player 1 it will spawn them a jak to play as.
+(defun spawn-extra-targets-code()
+  ;;Multiplayer stuff to clean and move
+  (dotimes (tgt-idx (-> *target-list* length))
+    (when (and (> tgt-idx 0)
+               (cpad-hold? tgt-idx l3)
+               (or *cheat-mode* (= *kernel-boot-message* 'play)) ;; not in demo
+               )
+      (check-cheat-code (-> *cheat-temp* tgt-idx) tgt-idx
+        (up up down down left right left right)
+        (cpad-clear! tgt-idx r1)
+        ;; toggle!
+      
+        (cheats-sound-play *cheat-mode*)
+        (localmulti-start tgt-idx)
+        )
+      )
+    )
+  ;; back to normal main.gc code.)
+  (none)
+  )

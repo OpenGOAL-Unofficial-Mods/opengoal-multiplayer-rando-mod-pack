@@ -65,7 +65,7 @@
   (:methods
     (follow-path (_type_) none 20)
     (play-landing-sound (_type_ float) sound-id 21)
-    (dummy-22 (_type_ process-drawable) none 22)
+    (dummy-22 (_type_ target) none 22)
     )
   (:states
     snow-ball-roller-idle
@@ -239,12 +239,12 @@
               )
             (when (< (-> self path-u) (-> self path-fall-u))
               (when (>= (- (-> *display* base-frame-counter) (-> self last-bounce-time)) (-> self delay-til-bounce))
-                (let ((f0-13 (rand-vu-float-range 8192.0 20480.0)))
+                (let ((f0-13 (mod-rand-float-range 8192.0 20480.0)))
                   (+! (-> self root-override transv y) f0-13)
                   (play-landing-sound self f0-13)
                   )
                 (set! (-> self last-bounce-time) (-> *display* base-frame-counter))
-                (set! (-> self delay-til-bounce) (rand-vu-int-range 300 2100))
+                (set! (-> self delay-til-bounce) (mod-rand-int-range 300 2100))
                 )
               )
             )
@@ -312,7 +312,7 @@
   (none)
   )
 
-(defmethod dummy-22 snow-ball-roller ((obj snow-ball-roller) (arg0 process-drawable))
+(defmethod dummy-22 snow-ball-roller ((obj snow-ball-roller) (arg0 target))
   (cond
     ((< (+ 4096.0 (-> arg0 root trans y)) (-> obj root-override trans y))
      (let ((f0-2 81920.0))
@@ -372,7 +372,7 @@
                          (do-push-aways! (-> self root-override))
                          (when (>= (- (-> *display* base-frame-counter) (-> self hit-player-time)) (seconds 0.5))
                            (set! (-> self hit-player-time) (-> *display* base-frame-counter))
-                           (dummy-22 self *target*)
+                           (dummy-22 self (the-as target arg0))
                            )
                          )
                        )
@@ -455,7 +455,7 @@
        )
       )
     )
-  (set! (-> self delay-til-bounce) (rand-vu-int-range 900 2100))
+  (set! (-> self delay-til-bounce) (mod-rand-int-range 900 2100))
   (process-spawn snow-ball-shadow :to self)
   (go snow-ball-roller-idle)
   (none)
@@ -524,7 +524,7 @@
                     gp-0
                     )
                    (else
-                     (rand-vu-int-range 0 1)
+                     (mod-rand-int-range 0 1)
                      )
                    )
             )
@@ -532,12 +532,12 @@
             (s5-0 (new 'stack-no-clear 'inline-array 'snow-ball-junction 4))
             )
         (loop
-          (let ((s3-0 (/ (+ 98304.0 (rand-vu-float-range 0.0 32768.0)) (path-distance (-> self path gp-0)))))
+          (let ((s3-0 (/ (+ 98304.0 (mod-rand-float-range 0.0 32768.0)) (path-distance (-> self path gp-0)))))
             (dummy-14 self s5-0 s3-0 gp-0)
             (when (dummy-15 self s5-0 gp-0)
               (process-spawn snow-ball-roller (-> self entity) self s3-0 gp-0 s5-0 :to self)
               (set! (-> self state-time) (-> *display* base-frame-counter))
-              (set! (-> self delay-til-next) (rand-vu-int-range 450 1650))
+              (set! (-> self delay-til-next) (mod-rand-int-range 450 1650))
               (cond
                 ((= gp-0 (-> self last-path-picked))
                  (+! (-> self same-path-picked-count) 1)

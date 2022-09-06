@@ -424,7 +424,7 @@
            )
           ((ja-group? eichar-attack-from-stance-ja)
            (cond
-             ((rand-vu-percent? (the-as float 0.3))
+             ((mod-rand-percent? (the-as float 0.3))
               (ja-no-eval :group! eichar-attack-from-stance-alt-end-ja :num! (seek!) :frame-num 0.0)
               (until (ja-done? 0)
                 (suspend)
@@ -458,7 +458,7 @@
           ((ja-group? eichar-attack-punch-ja)
            (set! (-> self control unknown-float81) (-> self control unknown-float80))
            (set! (-> self control unknown-surface00) *walk-no-turn-mods*)
-           (ja-no-eval :group! (if (rand-vu-percent? (the-as float 0.3))
+           (ja-no-eval :group! (if (mod-rand-percent? (the-as float 0.3))
                                   eichar-attack-punch-alt-end-ja
                                   eichar-attack-punch-end-ja
                                   )
@@ -677,7 +677,7 @@
         ((ja-group? eichar-attack-from-stance-ja)
          (let ((f30-1 (fmax 0.8 (fmin 1.0 (* 0.000048828126 (-> self control unknown-float01))))))
            (cond
-             ((and (rand-vu-percent? (the-as float 0.3)) (< 20480.0 (-> self control unknown-float01)))
+             ((and (mod-rand-percent? (the-as float 0.3)) (< 20480.0 (-> self control unknown-float01)))
               (ja-no-eval :group! eichar-attack-from-stance-alt-end-ja
                           :num! (seek! (ja-aframe (the-as float 29.0) 0) f30-1)
                           :frame-num 0.0
@@ -1920,7 +1920,7 @@
          (or (= v1-4 eichar-launch-jump-ja) (= v1-4 eichar-launch-jump-loop-ja))
          )
        (dummy-10 (-> self skel effect) 'group-blue-hit-ground-effect (the-as float 0.0) -1)
-       (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.3))
+       (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.3))
        )
       (else
         (let ((f0-1 (vector-dot
@@ -2036,7 +2036,7 @@
                  (>= (-> self fact-info-target eco-level) 1.0)
                  )
         (dummy-10 (-> self skel effect) 'group-red-eco-spinkick (ja-frame-num 0) 74)
-        (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+        (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
         (level-hint-spawn
           (game-text-id misty-eco-red-first-use)
           "sksp0072"
@@ -2232,7 +2232,7 @@
                  (>= (-> self fact-info-target eco-level) 1.0)
                  )
         (dummy-10 (-> self skel effect) 'group-red-eco-spinkick (ja-frame-num 0) 23)
-        (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+        (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
         (level-hint-spawn
           (game-text-id misty-eco-red-first-use)
           "sksp0072"
@@ -2462,7 +2462,7 @@
                (>= (-> self fact-info-target eco-level) 1.0)
                )
       (dummy-10 (-> self skel effect) 'group-red-eco-spinkick (ja-frame-num 0) 70)
-      (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+      (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
       (level-hint-spawn
         (game-text-id misty-eco-red-first-use)
         "sksp0072"
@@ -2626,7 +2626,7 @@
                (>= (-> self fact-info-target eco-level) 1.0)
                )
       (dummy-10 (-> self skel effect) 'group-red-eco-spinkick (ja-frame-num 0) 23)
-      (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+      (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
       )
     (if (and (= (-> self control unknown-symbol30) 'uppercut)
              (< (vector-dot (-> self control dynam gravity-normal) (-> self control transv)) -8192.0)
@@ -2768,7 +2768,7 @@
         (when (and (= (-> self fact-info-target eco-type) (pickup-type eco-red))
                    (>= (-> self fact-info-target eco-level) 1.0)
                    )
-          (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.5))
+          (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.5))
           (dummy-10 (-> self skel effect) 'group-red-eco-strike-ground (ja-frame-num 0) 0)
           (let ((s5-1 (process-spawn touch-tracker :init touch-tracker-init (-> self control trans) 4096.0 30 :to self)))
             (send-event (ppointer->process s5-1) 'event 'attack 'flop)
@@ -2799,12 +2799,12 @@
         (-> self skel effect)
         'group-red-eco-spinkick
         (ja-frame-num 0)
-        (if (rand-vu-percent? (the-as float 0.5))
+        (if (mod-rand-percent? (the-as float 0.5))
             23
             17
             )
         )
-      (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+      (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
       )
     (when (and (not (-> self control unknown-symbol30)) (ja-group? eichar-flop-down-ja) (>= (ja-aframe-num 0) 8.0))
       (target-start-attack)
@@ -2938,7 +2938,7 @@
           )
       )
     (target-land-effect)
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.1))
+    (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.1))
     (set! (-> self state-time) (-> *display* base-frame-counter))
     (set! (-> self control unknown-uint20) (the-as uint arg0))
     (set-forward-vel (the-as float 0.0))
@@ -2963,12 +2963,12 @@
         (-> self skel effect)
         'group-red-eco-spinkick
         (ja-frame-num 0)
-        (if (rand-vu-percent? (the-as float 0.5))
+        (if (mod-rand-percent? (the-as float 0.5))
             23
             17
             )
         )
-      (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.1))
+      (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 153 (seconds 0.1))
       )
     (let ((v1-33 (ja-group)))
       (if (and (or (= v1-33 eichar-flop-down-land-ja) (= v1-33 eichar-moving-flop-down-land-ja))

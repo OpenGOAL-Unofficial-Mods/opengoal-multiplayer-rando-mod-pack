@@ -109,7 +109,7 @@
          v0-0
          )
         ((= v1-0 'continue)
-         (go target-continue (the-as continue-point (-> arg3 param 0)))
+         (go target-continue (the-as continue-point (-> arg3 param 0)) 0) ;; TODO should this be dynamic by target idx?
          )
         ((= v1-0 'query)
          (case (-> arg3 param 0)
@@ -323,7 +323,7 @@
               )
           )
     (set! (-> s5-0 mask) (attack-mask attacker shove-back shove-up angle))
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.1))
+    (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.1))
     (go arg3 'shove s5-0)
     )
   )
@@ -424,7 +424,7 @@
              )
          self
          )
-       (cpad-set-buzz! (-> *cpad-list* cpads 0) 0 255 (seconds 0.5))
+       (cpad-set-buzz! (-> self control unknown-cpad-info00) 0 255 (seconds 0.5))
        (sound-play "oof")
        #t
        )
@@ -530,7 +530,7 @@
                #f
                (static-sound-name "spin-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 127 (seconds 0.2))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 127 (seconds 0.2))
              )
             ((= v1-5 'punch)
              (set! sv-128
@@ -624,7 +624,7 @@
                #f
                (static-sound-name "punch-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 178 (seconds 0.1))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 178 (seconds 0.1))
              )
             ((= v1-5 'flip)
              (dummy-12
@@ -635,7 +635,7 @@
                #f
                (static-sound-name "punch-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 127 (seconds 0.1))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 127 (seconds 0.1))
              )
             ((= v1-5 'uppercut)
              (set! sv-176
@@ -730,7 +730,7 @@
                #f
                (static-sound-name "uppercut-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 178 (seconds 0.1))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 178 (seconds 0.1))
              )
             ((or (= v1-5 'flop) (= v1-5 'flop-down))
              (dummy-10 (-> self skel effect) 'group-flop-hit (the-as float -1.0) 23)
@@ -743,7 +743,7 @@
                #f
                (static-sound-name "flop-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 178 (seconds 0.1))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 178 (seconds 0.1))
              )
             ((= v1-5 'flut-attack)
              (dummy-12
@@ -754,7 +754,7 @@
                #f
                (static-sound-name "punch-hit")
                )
-             (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.2))
+             (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.2))
              )
             )
           )

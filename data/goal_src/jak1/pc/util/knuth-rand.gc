@@ -83,5 +83,73 @@
   (/ (the float (knuth-rand-next 24)) (shl 1 24))
   )
 
+;; returns a pseudorandom float in the range [min, max)
+(defun knuth-rand-float-range ((min float) (max float))
+  (+ min (* (knuth-rand-next-float) (- max min)))
+  )
+
+;; Get a boolean that's true with the given probability
+(defun knuth-rand-percent? ((prob float))
+  (>= prob (knuth-rand-next-float))
+  )
+
+;; Get an integer in the range [0, max)
+(defun knuth-rand-int-count ((max int))
+  (the int (* (knuth-rand-next-float) (the float max)))
+  )
+
 (knuth-rand-init (scf-time-to-int64))
 
+;; ---------- generic mod RNG section -------------
+
+;; Random float in [0,1)
+(defun mod-rand-next-float ()
+  (case (-> *randomizer-settings* rng-lib)
+    (('rand-vu) (rand-vu))
+    (('knuth) (knuth-rand-next-float))
+    )
+  )
+
+;; Random float in [min,max)
+(defun mod-rand-float-range ((min float) (max float))
+  (case (-> *randomizer-settings* rng-lib)
+    (('rand-vu) (rand-vu-float-range min max))
+    (('knuth) (knuth-rand-float-range min max))
+    )
+  )
+
+;; Boolean that's true with the given probability
+(defun mod-rand-percent? ((prob float))
+  (case (-> *randomizer-settings* rng-lib)
+    (('rand-vu) (rand-vu-percent? prob))
+    (('knuth) (knuth-rand-percent? prob))
+    )
+  )
+
+;; Random int in [min,max]
+(defun mod-rand-int-range ((min int) (max int))
+  (case (-> *randomizer-settings* rng-lib)
+    (('rand-vu) (rand-vu-int-range min max))
+    (('knuth) (knuth-rand-int-range min (+ max 1))) ;;rand-vu included the max, so we increase by 1 to do the same
+    )
+  )
+
+;; Get an integer in [0, max)
+(defun mod-rand-int-count ((max int))
+  (case (-> *randomizer-settings* rng-lib)
+    (('rand-vu) (rand-vu-int-count max))
+    (('knuth) (knuth-rand-int-count max))
+    )
+  )
+
+;; Get a random point on the sphere at the origin with radius arg1.
+;; The point is on the surface of the sphere."
+(defun mod-rand-sphere-point! ((arg0 vector) (arg1 float))
+  (set-vector! arg0
+               (mod-rand-float-range -1.0 1.0)
+               (mod-rand-float-range -1.0 1.0)
+               (mod-rand-float-range -1.0 1.0)
+               1.0
+               )
+  (vector-normalize! arg0 (mod-rand-float-range 0.0 arg1))
+  )

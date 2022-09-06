@@ -2375,7 +2375,7 @@
         (vector-! (-> gp-0 away-dir) arg1 (the-as vector s2-1))
         (set! (-> gp-0 away-dir y) 0.0)
         (when (>= 40.96 (vector-length (-> gp-0 away-dir)))
-          (set! (-> gp-0 rand-angle) (* 65536.0 (rand-vu)))
+          (set! (-> gp-0 rand-angle) (* 65536.0 (mod-rand-next-float)))
           (set! (-> gp-0 away-dir x) (cos (-> gp-0 rand-angle)))
           (set! (-> gp-0 away-dir z) (sin (-> gp-0 rand-angle)))
           )

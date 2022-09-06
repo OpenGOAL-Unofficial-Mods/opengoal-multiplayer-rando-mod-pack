@@ -480,7 +480,7 @@
 
 (defbehavior mother-spider-egg-init-by-other mother-spider-egg ((arg0 entity-actor) (arg1 vector) (arg2 vector) (arg3 vector))
   (set! (-> self entity) arg0)
-  (set! (-> self anim-speed) (rand-vu-float-range 0.8 1.2))
+  (set! (-> self anim-speed) (mod-rand-float-range 0.8 1.2))
   (set! (-> self falling-start-time) (-> *display* base-frame-counter))
   (set! (-> self fall-dest quad) (-> arg2 quad))
   (set! (-> self fall-dest-normal quad) (-> arg3 quad))

@@ -294,9 +294,9 @@
 
 (defun text-randomizer ()
   (dotimes (i 10000)
-    (let ((idx1 (rand-vu-int-count (-> *common-text* length))))
-      (dotimes (j 20) (rand-vu))
-      (let ((idx2 (rand-vu-int-count (-> *common-text* length))))
+    (let ((idx1 (mod-rand-int-count (-> *common-text* length))))
+      (dotimes (j 20) (mod-rand-next-float))
+      (let ((idx2 (mod-rand-int-count (-> *common-text* length))))
         (let ((temp (-> *common-text* data idx1 text)))
           (set! (-> *common-text* data idx1 text) (-> *common-text* data idx2 text))
           (set! (-> *common-text* data idx2 text) temp)

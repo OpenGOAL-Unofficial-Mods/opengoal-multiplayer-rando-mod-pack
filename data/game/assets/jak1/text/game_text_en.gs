@@ -41,6 +41,7 @@
         "ARE YOU SURE YOU WANT TO DISABLE AUTO-SAVE?")
 (#x100e "DISABLE AUTO-SAVE"
         "DISABLE AUTO-SAVE")
+
 (#x100f "MISCELLANEOUS"
         "MISCELLANEOUS")
 
@@ -219,6 +220,15 @@
 (#x10a0 "HUGE HEAD JAK"
         "HUGE HEAD JAK")
 
+(#x10bc "SMALL JAK"
+        "SMALL JAK")
+(#x10bd "BIG JAK"
+        "BIG JAK")
+(#x10be "FLAT JAK"
+        "FLAT JAK")
+(#x10bf "PAPER JAK"
+        "PAPER JAK")
+
 (#x10c0 "MUSIC PLAYER"
         "MUSIC PLAYER")
 (#x10c1 "SCENE PLAYER"
@@ -355,9 +365,99 @@
         "DANSK")
 (#x1116 "NORSK"
         "NORSK")
-
+        
 (#x1500 "SPEEDRUNNER MODE"
         "SPEEDRUNNER MODE")
+(#x1501 "CUTSCENE SKIPS"
+        "CUTSCENE SKIPS")
+
+;; Mod Options
+(#x1600 "MOD OPTIONS"
+        "MOD OPTIONS")
+(#x1601 "CHECKPOINT RANDOMIZER"
+        "CHECKPOINT RANDOMIZER")
+(#x1602 "TOGGLE CHALLENGES"
+        "TOGGLE CHALLENGES")
+(#x1603 "RNG LIBRARY"
+        "RNG LIBRARY")
+(#x1604 "POWER CELL CUTSCENES"
+        "POWER CELL CUTSCENES")
+(#x1605 "ADDITIONAL CHECKPOINTS"
+        "ADDITIONAL CHECKPOINTS")
+
+;; Checkpoint Randomizer
+(#x1610 "ITEM/DEATH COUNT TO WARP"
+        "ITEM/DEATH COUNT TO WARP")
+(#x1611 "RANDOMIZER LOGIC"
+        "RANDOMIZER LOGIC")
+(#x1612 "RANDOM-SEED"
+        "RANDOM-SEED")
+(#x1613 "SET-SEED"
+        "SET-SEED")
+(#x1614 "WARP SETTINGS"
+        "WARP SETTINGS")
+(#x1615 "WARP ON CELLS?"
+        "WARP ON CELLS?")
+(#x1616 "WARP ON ORBS?"
+        "WARP ON ORBS?")
+(#x1617 "WARP ON FLIES?"
+        "WARP ON FLIES?")
+(#x1618 "WARP ON GREEN ECO?"
+        "WARP ON GREEN ECO?")
+(#x1619 "WARP ON BLUE ECO?"
+        "WARP ON BLUE ECO?")
+(#x161a "WARP ON RED ECO?"
+        "WARP ON RED ECO?")
+(#x161b "WARP ON YELLOW ECO?"
+        "WARP ON YELLOW ECO?")
+(#x161c "WARP ON ECO VENTS?"
+        "WARP ON ECO VENTS?")
+(#x161d "WARP ON DEATH?"
+        "WARP ON DEATH?")
+(#x161e "SHOW WARP COUNTER?"
+        "SHOW WARP COUNTER?")
+(#x161f "CHECKPOINT LOGIC"
+        "CHECKPOINT LOGIC")
+(#x1620 "RANDOM CHECKPOINT"
+        "RANDOM CHECKPOINT")
+(#x1621 "RANDOM LEVEL"
+        "RANDOM LEVEL")
+
+;; Challenges
+(#x1630 "ORBLESS"
+        "ORBLESS")
+(#x1631 "HARDCORE"
+        "HARDCORE")
+(#x1632 "DAMAGELESS"
+        "DAMAGELESS")  
+(#x1633 "BONKLESS"
+        "BONKLESS")
+(#x1634 "CASUAL"
+        "CASUAL")
+(#x1635 "PACIFIST"
+        "PACIFIST")
+
+;; RNG Library
+(#x1640 "RAND-VU (ORIGINAL)"
+        "RAND-VU (ORIGINAL)")
+(#x1641 "KNUTH"
+        "KNUTH")
+
+;; Additional Checkpoints
+(#x1650 "TRAINING-FAR"
+        "TRAINING-FAR")
+(#x1651 "VILLAGE1-FAR"
+        "VILLAGE1-FAR")
+(#x1652 "BEACH-PELICAN"
+        "BEACH-PELICAN")
+(#x1653 "BEACH-FAR"
+        "BEACH-FAR")
+(#x1654 "JUNGLE-FAR"
+        "JUNGLE-FAR")
+(#x1655 "SWAMP-FLUTFLUT"
+        "SWAMP-FLUTFLUT")
+(#x1656 "VILLAGE3-CART"
+        "VILLAGE3-CART")
 
 ;; -----------------
 ;; test (DO NOT TRANSLATE)

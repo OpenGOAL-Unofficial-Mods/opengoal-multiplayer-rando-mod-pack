@@ -1038,7 +1038,7 @@ nav-enemy-default-event-handler
            )
       (let ((s4-0 0))
         (while (and (not v1-2) (< s4-0 4))
-          (let ((f0-0 (rand-vu-float-range -40960.0 40960.0)))
+          (let ((f0-0 (mod-rand-float-range -40960.0 40960.0)))
             (vector+*! s5-0 (-> self collide-info trans) gp-0 f0-0)
             )
           (kermit-set-nav-mesh-target s5-0)

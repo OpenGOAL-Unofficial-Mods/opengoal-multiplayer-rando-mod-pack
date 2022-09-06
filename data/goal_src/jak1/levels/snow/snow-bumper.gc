@@ -23,7 +23,7 @@
   :flag-assert         #x16006000c8
   (:methods
     (dummy-20 (_type_) none 20)
-    (shove-player (_type_ process-drawable) none 21)
+    (shove-player (_type_ target) none 21)
     )
   (:states
     snow-bumper-active-close-idle
@@ -100,7 +100,7 @@
     )
   )
 
-(defmethod shove-player snow-bumper ((obj snow-bumper) (arg0 process-drawable))
+(defmethod shove-player snow-bumper ((obj snow-bumper) (arg0 target))
   (let ((s5-0 (new 'stack-no-clear 'vector)))
     (vector-! s5-0 (-> arg0 root trans) (-> obj root trans))
     (set! (-> s5-0 y) 0.0)
@@ -132,7 +132,7 @@
       )
     (let ((f30-3 (vector-xz-length s5-0)))
       (vector-normalize! s5-0 1.0)
-      (if (send-event *target* 'shove #f (static-attack-info ((vector s5-0) (shove-up (meters 1)) (shove-back f30-3))))
+      (if (send-event arg0 'shove #f (static-attack-info ((vector s5-0) (shove-up (meters 1)) (shove-back f30-3))))
           (set! (-> obj last-shoved-player-time) (-> *display* base-frame-counter))
           )
       )
@@ -142,7 +142,7 @@
 
 (defstate snow-bumper-active-far-idle (snow-bumper)
   :trans (behavior ()
-    (if (and *target* (>= 135895450000.0 (vector-vector-xz-distance-squared (-> self root trans) (target-pos 0))))
+    (when (and *target* (>= 135895450000.0 (vector-vector-xz-distance-squared (-> self root trans) (target-pos 0))))
         (go snow-bumper-active-close-idle)
         )
     0
@@ -165,7 +165,7 @@
       (('touch 'attack 'bonk)
        (when (= (-> arg0 type) target)
          (let ((gp-0 (-> arg3 param 0)))
-           (when (and (>= 6144.0 (vector-vector-xz-distance (-> self root trans) (target-pos 0)))
+           (when (and (>= 6144.0 (vector-vector-xz-distance (-> self root trans) (target-pos-specific 0 (the-as target arg0))))
                       ((method-of-type touching-shapes-entry prims-touching?)
                        (the-as touching-shapes-entry gp-0)
                        (the-as collide-shape-moving (-> self root))
@@ -183,20 +183,24 @@
   :trans (behavior ()
     (cond
       (*target*
-        (let* ((gp-0 (target-pos 0))
-               (f30-0 (vector-vector-xz-distance (-> self root trans) gp-0))
-               (f28-0 (- (-> gp-0 y) (-> self root trans y)))
-               )
-          (if (< 368640.0 f30-0)
-              (go snow-bumper-active-far-idle)
+        (dotimes (tgt-idx (-> *target-list* length))
+          (when (get-target tgt-idx)
+            (let* ((gp-0 (target-pos-multi 0 tgt-idx))
+                  (f30-0 (vector-vector-xz-distance (-> self root trans) gp-0))
+                  (f28-0 (- (-> gp-0 y) (-> self root trans y)))
+                  )
+              (when (and (< 368640.0 f30-0) (= tgt-idx 0))
+                  (go snow-bumper-active-far-idle)
+                  )
+              (when (and (>= (- (-> *display* base-frame-counter) (-> self last-shoved-player-time)) (seconds 0.5))
+                      (>= 20480.0 f30-0)
+                      (>= f28-0 -4096.0)
+                      (>= 11059.2 f28-0)
+                      )
+                  (shove-player self (get-target tgt-idx))
+                  )
               )
-          (if (and (>= (- (-> *display* base-frame-counter) (-> self last-shoved-player-time)) (seconds 0.5))
-                   (>= 20480.0 f30-0)
-                   (>= f28-0 -4096.0)
-                   (>= 11059.2 f28-0)
-                   )
-              (shove-player self *target*)
-              )
+            )
           )
         )
       (else

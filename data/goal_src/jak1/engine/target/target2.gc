@@ -76,7 +76,7 @@
   :enter (behavior ()
     (set! (-> self neck flex-blend) 0.0)
     ((-> target-stance enter))
-    (let ((v1-2 (rand-vu-int-count 4)))
+    (let ((v1-2 (mod-rand-int-count 4)))
       (cond
         ((zero? v1-2)
          (set! (-> self control unknown-uint20)
@@ -1013,7 +1013,7 @@
       (ja :num! (seek!))
       )
     (loop
-      (set! (-> self anim-seed) (the-as uint (if (rand-vu-percent? (the-as float 0.1))
+      (set! (-> self anim-seed) (the-as uint (if (mod-rand-percent? (the-as float 0.1))
                                                  0
                                                  1
                                                  )
@@ -1171,21 +1171,25 @@
              (= (-> *cpad-list* cpads (-> self control unknown-cpad-info00 number) stick0-speed) 0.0)
              )
          (let ((a1-2 (new 'stack-no-clear 'collide-using-spheres-params)))
-           (set! (-> a1-2 spheres) (-> *collide-edge-work* world-player-leap-up-spheres))
-           (set! (-> a1-2 num-spheres) (the-as uint 6))
-           (set! (-> a1-2 collide-with) (-> self control root-prim collide-with))
-           (set! (-> a1-2 proc) #f)
-           (set! (-> a1-2 ignore-pat) (new 'static 'pat-surface :noentity #x1))
-           (set! (-> a1-2 solid-only) #t)
-           (when (not (fill-and-probe-using-spheres *collide-cache* a1-2))
-             (remove-exit)
-             (go
-               target-edge-grab-jump
-               (-> *TARGET-bank* edge-grab-jump-height-min)
-               (-> *TARGET-bank* edge-grab-jump-height-max)
-               )
-             )
-           )
+          (dotimes (tgt-idx (-> *target-list* length))
+            (when (and (get-target tgt-idx) (= self (get-target tgt-idx)))
+              (set! (-> a1-2 spheres) (-> *collide-edge-work-list* tgt-idx world-player-leap-up-spheres))
+              (set! (-> a1-2 num-spheres) (the-as uint 6))
+              (set! (-> a1-2 collide-with) (-> self control root-prim collide-with))
+              (set! (-> a1-2 proc) #f)
+              (set! (-> a1-2 ignore-pat) (new 'static 'pat-surface :noentity #x1))
+              (set! (-> a1-2 solid-only) #t)
+              (when (not (fill-and-probe-using-spheres (-> *edge-collide-cache-list* tgt-idx) a1-2 (-> *edge-collide-work-list* tgt-idx)))
+                (remove-exit)
+                (go
+                  target-edge-grab-jump
+                  (-> *TARGET-bank* edge-grab-jump-height-min)
+                  (-> *TARGET-bank* edge-grab-jump-height-max)
+                  )
+                )
+              )
+            )
+          )
          )
         (else
           (remove-exit)
@@ -2554,7 +2558,7 @@
           (the-as handle #f)
           )
         )
-      (if (zero? (logand (-> *cpad-list* cpads 0 button0-abs 0) (pad-buttons l3)))
+      (if (zero? (logand (-> self control unknown-cpad-info00 button0-abs 0) (pad-buttons l3)))
           (target-timed-invulnerable (-> *TARGET-bank* hit-invulnerable-timeout) self)
           )
       )
@@ -2564,7 +2568,7 @@
        (go target-death 'target-hit-ground-hard)
        )
       (else
-        (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.1))
+        (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 255 (seconds 0.1))
         (ja-channel-push! 1 1)
         (ja :group! eichar-painful-land-ja :num! min)
         (until (and (ja-done? 0) (= (-> self skel root-channel 0) (-> self skel channel)))

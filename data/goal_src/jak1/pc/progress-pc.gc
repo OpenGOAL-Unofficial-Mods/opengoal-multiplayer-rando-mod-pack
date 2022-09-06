@@ -91,7 +91,8 @@
 (def-progress-carousell *carousell-frame-rate-150fps* (60fps 100fps 150fps))
 (def-progress-carousell *carousell-frame-rate-100fps* (60fps 100fps))
 (define *carousell-frame-rate* *carousell-frame-rate-150fps*)
-
+(def-progress-carousell *carousell-rng-lib* (rand-vu knuth))
+(def-progress-carousell *carousell-checkpoint-logic* (logic-random-checkpoint logic-random-level))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -125,6 +126,7 @@
   )
 
 (define *game-options-pc* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id misc-options) :scale #t :param3 (game-option-menu misc-options))
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id vibrations) :scale #t)
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id play-hints) :scale #t)
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id subtitles) :scale #t)
@@ -134,7 +136,6 @@
     (new 'static 'game-option :option-type (game-option-type language-text) :name (game-text-id text-language) :scale #t)
     (new 'static 'game-option :option-type (game-option-type speaker) :name (game-text-id subtitles-speaker) :scale #t)
     (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id camera-options) :scale #t :param3 (game-option-menu camera-options))
-    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id misc-options) :scale #t :param3 (game-option-menu misc-options))
     (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
     )
   )
@@ -163,11 +164,15 @@
     )
   )
 
+
 (define *misc-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id mod-options) :scale #t :param3 (game-option-menu mod-options))
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id money-starburst) :scale #t)
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id discord-rpc) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id cutscene-skips) :scale #t)
     (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id speedrunner-mode) :scale #t)
     (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+   
     )
   )
 
@@ -177,6 +182,64 @@
     (new 'static 'game-option :option-type (game-option-type normal-inverted) :name (game-text-id camera-controls-third-horz) :scale #t)
     (new 'static 'game-option :option-type (game-option-type normal-inverted) :name (game-text-id camera-controls-third-vert) :scale #t)
     (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id restore-defaults) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+    )
+  )
+
+(define *mod-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id checkpoint-randomizer) :scale #t :param3 (game-option-menu randomizer-main-options))
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id custom-challenges) :scale #t :param3 (game-option-menu challenges-options))
+    (new 'static 'game-option :option-type (game-option-type rng-lib) :name (game-text-id rng-lib) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id mod-powercellcutscenes) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id additional-checkpoints) :scale #t :param3 (game-option-menu additional-checkpoint-options))
+    (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+    )
+  )
+
+(define *randomizer-main-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-randomizer) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type use-random-seed?) :name (game-text-id use-random-seed?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type checkpoint-logic) :name (game-text-id checkpoint-logic) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type menu) :name (game-text-id randomizer-warp-options) :scale #t :param3 (game-option-menu randomizer-warp-options))
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id show-warp-counter?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+    )
+  )
+
+(define *randomizer-warp-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpcells?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warporbs?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpbuzzer?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpgreeneco?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpblueeco?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpredeco?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpyelloweco?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpecovents?) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-warpdeath?) :scale #t)
+    (new 'static 'game-option :name (game-text-id item-count-to-trigger-warp) :scale #t :param1 1.0 :param2 102.0)
+    (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+    )
+  )
+
+(define *challenges-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-orbless) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-hardcore) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-damageless) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-pacifist) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-bonkless) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-casual) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
+    )
+  )
+
+(define *additional-checkpoint-options* (new 'static 'boxed-array :type game-option
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-training-far) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-village1-far) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-beach-pelican) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-beach-far) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-jungle-far) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-swamp-flutflut) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id checkpoint-village3-cart) :scale #t)
     (new 'static 'game-option :option-type (game-option-type button) :name (game-text-id back) :scale #t)
     )
   )
@@ -251,6 +314,13 @@
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-tunes) :scale #t :param1 6.0)
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-sky) :scale #t :param1 7.0)
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-huge-head) :scale #t :param1 15.0)
+    
+    ;; Added in mod, so doesn't use cheat-toggle
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-smalljak) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-bigjak) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-flatjak) :scale #t)
+    (new 'static 'game-option :option-type (game-option-type on-off) :name (game-text-id challenges-paperjak) :scale #t)
+
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-mirror) :scale #t :param1 8.0)
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-eco-yellow) :scale #t :param1 3.0)
     (new 'static 'game-option :option-type (game-option-type cheat-toggle) :name (game-text-id cheat-eco-blue) :scale #t :param1 2.0)
@@ -347,7 +417,7 @@
 (define *text-languages* (static-text-list-array
         english uk-english french german spanish italian japanese))
 (define *subtitle-languages* (static-text-list-array
-        english german spanish))
+        english german spanish br-portuguese))
 
 
 
@@ -531,7 +601,7 @@
   (dotimes (i (pc-get-monitor-count))
     (add-monitor-option (game-text-id display-fmt) i)
     )
-  
+
   (add-back-option)
   *temp-options*)
 
@@ -714,9 +784,14 @@
   (set! (-> *options-remap* (progress-screen cheats))                     *cheats*)
   (set! (-> *options-remap* (progress-screen music-player))               *music-player-options*)
   (set! (-> *options-remap* (progress-screen flava-player))               *temp-options*)
+  (set! (-> *options-remap* (progress-screen randomizer-main-options))    *randomizer-main-options*)
+  (set! (-> *options-remap* (progress-screen randomizer-warp-options))    *randomizer-warp-options*)
+  (set! (-> *options-remap* (progress-screen challenges-options))         *challenges-options*)
+  (set! (-> *options-remap* (progress-screen mod-options))                *mod-options*)
   (set! (-> *options-remap* (progress-screen memcard-disable-auto-save))  *yes-no-options*)
   (set! (-> *options-remap* (progress-screen memcard-auto-save-disabled)) *ok-options*)
   (set! (-> *options-remap* (progress-screen monitor))                    *temp-options*)
+  (set! (-> *options-remap* (progress-screen additional-checkpoint-options)) *additional-checkpoint-options*)
 
   ;; set default params
   (set! (-> *progress-state* aspect-ratio-choice) (get-aspect-ratio))
@@ -737,43 +812,95 @@
   (set! (-> *sound-options* 2 value-to-modify) (&-> *setting-control* default dialog-volume))
   (set! (-> *yes-no-options* 0 value-to-modify) (&-> *progress-state* yes-no-choice))
   ;; our options!
-  (set! (-> *game-options-pc* 0 value-to-modify) (&-> *setting-control* default vibration))
-  (set! (-> *game-options-pc* 1 value-to-modify) (&-> *setting-control* default play-hints))
-  (set! (-> *game-options-pc* 2 value-to-modify) (&-> *pc-settings* subtitles?))
-  (set! (-> *game-options-pc* 3 value-to-modify) (&-> *pc-settings* hinttitles?))
-  (set! (-> *game-options-pc* 4 value-to-modify) (&-> *setting-control* default language))
-  (set! (-> *game-options-pc* 5 value-to-modify) (&-> *progress-carousell* int-backup))
+  (set! (-> *game-options-pc* 1 value-to-modify) (&-> *setting-control* default vibration))
+  (set! (-> *game-options-pc* 2 value-to-modify) (&-> *setting-control* default play-hints))
+  (set! (-> *game-options-pc* 3 value-to-modify) (&-> *pc-settings* subtitles?))
+  (set! (-> *game-options-pc* 4 value-to-modify) (&-> *pc-settings* hinttitles?))
+  (set! (-> *game-options-pc* 5 value-to-modify) (&-> *setting-control* default language))
   (set! (-> *game-options-pc* 6 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *game-options-pc* 7 value-to-modify) (&-> *progress-carousell* int-backup))
+  (set! (-> *game-options-pc* 8 value-to-modify) (&-> *progress-carousell* int-backup))
+
   (set! (-> *graphic-options-pc* 1 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *graphic-options-pc* 2 value-to-modify) (&-> *pc-settings* monitor))
   (set! (-> *graphic-options-pc* 3 value-to-modify) (&-> *pc-settings* vsync?))
   (set! (-> *graphic-options-pc* 5 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *graphic-options-pc* 6 value-to-modify) (&-> *progress-carousell* int-backup))
+  ;; disable changes to frame-rate while in speedrunner mode
+  (set! (-> *graphic-options-pc* 6 option-disabled-func) (lambda () (-> *pc-settings* speedrunner-mode?)))
+
   (set! (-> *graphic-options-no-frame-rate-pc* 1 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *graphic-options-no-frame-rate-pc* 2 value-to-modify) (&-> *pc-settings* vsync?))
   (set! (-> *graphic-options-no-frame-rate-pc* 4 value-to-modify) (&-> *progress-carousell* int-backup))
-  (set! (-> *misc-options* 0 value-to-modify) (&-> *pc-settings* money-starburst?))
-  (set! (-> *misc-options* 1 value-to-modify) (&-> *pc-settings* discord-rpc?))
-  (set! (-> *misc-options* 2 value-to-modify) (&-> *pc-settings* speedrunner-mode?))
+
+  (set! (-> *misc-options* 1 value-to-modify) (&-> *pc-settings* money-starburst?))
+  (set! (-> *misc-options* 2 value-to-modify) (&-> *pc-settings* discord-rpc?))
+  (set! (-> *misc-options* 3 value-to-modify) (&-> *pc-settings* cutscene-skips?))
+  (set! (-> *misc-options* 4 value-to-modify) (&-> *pc-settings* speedrunner-mode?))
+  
+  ;;Randomizer menu
+  (set! (-> *randomizer-main-options* 0 value-to-modify) (&-> *randomizer-settings* checkpoint-randomizer?))
+  (set! (-> *randomizer-main-options* 1 value-to-modify) (&-> *randomizer-settings* use-random-seed?))
+  (set! (-> *randomizer-main-options* 2 value-to-modify) (&-> *progress-carousell* int-backup)) ;; checkpoint-logic
+  (set! (-> *randomizer-main-options* 4 value-to-modify) (&-> *randomizer-settings* show-warp-counter?))
+
+  (set! (-> *randomizer-warp-options* 0 value-to-modify) (&-> *randomizer-settings* warp-on-cell?))
+  (set! (-> *randomizer-warp-options* 1 value-to-modify) (&-> *randomizer-settings* warp-on-orb?))
+  (set! (-> *randomizer-warp-options* 2 value-to-modify) (&-> *randomizer-settings* warp-on-buzzer?))
+  (set! (-> *randomizer-warp-options* 3 value-to-modify) (&-> *randomizer-settings* warp-on-green-eco?))
+  (set! (-> *randomizer-warp-options* 4 value-to-modify) (&-> *randomizer-settings* warp-on-blue-eco?))
+  (set! (-> *randomizer-warp-options* 5 value-to-modify) (&-> *randomizer-settings* warp-on-red-eco?))
+  (set! (-> *randomizer-warp-options* 6 value-to-modify) (&-> *randomizer-settings* warp-on-yellow-eco?))
+  (set! (-> *randomizer-warp-options* 7 value-to-modify) (&-> *randomizer-settings* warp-on-eco-vents?))
+  (set! (-> *randomizer-warp-options* 8 value-to-modify) (&-> *randomizer-settings* warp-on-death?))
+  (set! (-> *randomizer-warp-options* 9 value-to-modify) (&-> *randomizer-settings* collectables-needed-to-warp))
+
+  ;;Challenges menu
+  (set! (-> *challenges-options* 0 value-to-modify) (&-> *challenges-settings* challenges-orbless?))
+  (set! (-> *challenges-options* 1 value-to-modify) (&-> *challenges-settings* challenges-hardcore?))
+  (set! (-> *challenges-options* 2 value-to-modify) (&-> *challenges-settings* challenges-damageless?))
+  (set! (-> *challenges-options* 3 value-to-modify) (&-> *challenges-settings* challenges-pacifist?))
+  (set! (-> *challenges-options* 4 value-to-modify) (&-> *challenges-settings* challenges-bonkless?))
+  (set! (-> *challenges-options* 5 value-to-modify) (&-> *challenges-settings* challenges-casual?))
+  
+  ;;mod settings
+  (set! (-> *mod-options* 2 value-to-modify) (&-> *progress-carousell* int-backup)) ;; RNG Lib
+  (set! (-> *mod-options* 3 value-to-modify) (&-> *mods-settings* mod-powercellcutscenes?))
+
+  (set! (-> *additional-checkpoint-options* 0 value-to-modify) (&-> *mods-settings* checkpoint-training-far))
+  (set! (-> *additional-checkpoint-options* 1 value-to-modify) (&-> *mods-settings* checkpoint-village1-far))
+  (set! (-> *additional-checkpoint-options* 2 value-to-modify) (&-> *mods-settings* checkpoint-beach-pelican))
+  (set! (-> *additional-checkpoint-options* 3 value-to-modify) (&-> *mods-settings* checkpoint-beach-far))
+  (set! (-> *additional-checkpoint-options* 4 value-to-modify) (&-> *mods-settings* checkpoint-jungle-far))
+  (set! (-> *additional-checkpoint-options* 5 value-to-modify) (&-> *mods-settings* checkpoint-swamp-flutflut))
+  (set! (-> *additional-checkpoint-options* 6 value-to-modify) (&-> *mods-settings* checkpoint-village3-cart))
+
   (set! (-> *camera-options* 0 value-to-modify) (&-> *pc-settings* first-camera-h-inverted?))
   (set! (-> *camera-options* 1 value-to-modify) (&-> *pc-settings* first-camera-v-inverted?))
   (set! (-> *camera-options* 2 value-to-modify) (&-> *pc-settings* third-camera-h-inverted?))
   (set! (-> *camera-options* 3 value-to-modify) (&-> *pc-settings* third-camera-v-inverted?))
+
   (set! (-> *accessibility-options* 0 value-to-modify) (&-> *pc-settings* money-starburst?))
+
   (set! (-> *gfx-ps2-options* 0 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *gfx-ps2-options* 1 value-to-modify) (&-> *progress-carousell* int-backup))
   (set! (-> *gfx-ps2-options* 2 value-to-modify) (&-> *pc-settings* ps2-parts?))
   ;(set! (-> *gfx-ps2-options* 3 value-to-modify) (&-> *pc-settings* force-envmap?))
   ;(set! (-> *gfx-ps2-options* 3 value-to-modify) (&-> *pc-settings* force-actors?))
+
   (set! (-> *sound-options-pc* 0 value-to-modify) (&-> *setting-control* default sfx-volume))
   (set! (-> *sound-options-pc* 1 value-to-modify) (&-> *setting-control* default music-volume))
   (set! (-> *sound-options-pc* 2 value-to-modify) (&-> *setting-control* default dialog-volume))
-  (dotimes (i (1- (-> *cheats* length)))
-    (set! (-> *cheats* i value-to-modify) (&-> *progress-carousell* symbol-backup))
-    )
   ;(set! (-> *sound-options-pc* 3 value-to-modify) (&-> *pc-settings* music-fadein?))
 
+  (dotimes (i (1- (-> *cheats* length)))
+      (set! (-> *cheats* i value-to-modify) (&-> *progress-carousell* symbol-backup))
+    )
+  (set! (-> *cheats* 8 value-to-modify) (&-> *challenges-settings* challenges-smalljak?))
+  (set! (-> *cheats* 9 value-to-modify) (&-> *challenges-settings* challenges-bigjak?))
+  (set! (-> *cheats* 10 value-to-modify) (&-> *challenges-settings* challenges-flatjak?))
+  (set! (-> *cheats* 11 value-to-modify) (&-> *challenges-settings* challenges-paperjak?))
+  
   (set! (-> *progress-carousell* aspect-native-choice) (-> *pc-settings* use-vis?))
 
   ;; scroll stuff!
@@ -873,6 +1000,7 @@
                   (((game-option-type on-off)
                     (game-option-type yes-no)
                     (game-option-type normal-inverted)
+                    (game-option-type use-random-seed?)
                     (game-option-type aspect-native)
                     (game-option-type cheat-toggle))
                    ;; pressed left on an on/off yes/no option
@@ -910,6 +1038,8 @@
                     (game-option-type frame-rate)
                     (game-option-type language-subtitles)
                     (game-option-type language-text)
+                    (game-option-type rng-lib)
+                    (game-option-type checkpoint-logic)
                     )
                    ;; a carousell like language
                    (if (> (-> (the-as (pointer int) (-> options (-> obj option-index) value-to-modify))) 0)
@@ -983,6 +1113,7 @@
                   (((game-option-type on-off)
                     (game-option-type yes-no)
                     (game-option-type normal-inverted)
+                    (game-option-type use-random-seed?)
                     (game-option-type aspect-native)
                     (game-option-type cheat-toggle))
                    ;; play sound if it was on 'yes' because we're going to 'no' now
@@ -1013,6 +1144,8 @@
                     (game-option-type frame-rate)
                     (game-option-type language-subtitles)
                     (game-option-type language-text)
+                    (game-option-type rng-lib)
+                    (game-option-type checkpoint-logic)
                     )
                    ;; same thing as before. if at last, go to first. otherwise, keep going forward.
                    (if (< (-> (the-as (pointer int) (-> options (-> obj option-index) value-to-modify))) (1- (length (-> *progress-carousell* current-carousell))))
@@ -1085,7 +1218,7 @@
                (set! (-> (the-as (pointer language-enum) (-> options (-> obj option-index) value-to-modify)))
                      (-> *progress-state* language-backup))
                )
-              (((game-option-type on-off) (game-option-type normal-inverted))
+              (((game-option-type on-off) (game-option-type normal-inverted) (game-option-type use-random-seed?))
                (set! (-> (the-as (pointer symbol) (-> options (-> obj option-index) value-to-modify)))
                      (-> *progress-state* on-off-backup))
                )
@@ -1116,6 +1249,11 @@
          )
         ((or (cpad-pressed? 0 x) (cpad-pressed? 0 circle))
          ;; pressed x or circle. advance!
+         ;; first check if the option is disabled, if so leave early and do nothing
+         (when (and (!= (-> options (-> obj option-index) option-disabled-func) 0)
+                    ((-> options (-> obj option-index) option-disabled-func)))
+               (sound-play "menu-stats")
+               (return #f))
          (cond
            ((not (-> obj selected-option))
             ;; no option already selected.
@@ -1263,7 +1401,7 @@
                   (set! (-> *progress-state* language-backup)
                         (-> (the-as (pointer language-enum) (-> options (-> obj option-index) value-to-modify))))
                   )
-                 (((game-option-type on-off) (game-option-type normal-inverted))
+                 (((game-option-type on-off) (game-option-type normal-inverted) (game-option-type use-random-seed?))
                   (set! (-> *progress-state* on-off-backup)
                         (-> (the-as (pointer symbol) (-> options (-> obj option-index) value-to-modify))))
                   )
@@ -1329,6 +1467,18 @@
                             (set! (-> *progress-carousell* int-backup) i))
                         ))
                   )
+                 (((game-option-type rng-lib))
+                  (case (-> *randomizer-settings* rng-lib)
+                    (('rand-vu) (set! (-> *progress-carousell* int-backup) 0))
+                    (('knuth) (set! (-> *progress-carousell* int-backup) 1))
+                    )
+                  )
+                 (((game-option-type checkpoint-logic))
+                  (case (-> *randomizer-settings* checkpoint-logic)
+                    (('logic-random-checkpoint) (set! (-> *progress-carousell* int-backup) 0))
+                    (('logic-random-level) (set! (-> *progress-carousell* int-backup) 1))
+                    )
+                  )
                  )
                (sound-play "select-option")
                (cpad-clear! 0 x)
@@ -1355,6 +1505,8 @@
                      (((game-option-type frame-rate)) (set! (-> *progress-carousell* current-carousell) *carousell-frame-rate*))
                      (((game-option-type language-subtitles)) (set! (-> *progress-carousell* current-carousell) *subtitle-languages*))
                      (((game-option-type language-text)) (set! (-> *progress-carousell* current-carousell) *text-languages*))
+                     (((game-option-type rng-lib)) (set! (-> *progress-carousell* current-carousell) *carousell-rng-lib*))
+                     (((game-option-type checkpoint-logic)) (set! (-> *progress-carousell* current-carousell) *carousell-checkpoint-logic*))
                      )
                    )
                  )
@@ -1444,6 +1596,20 @@
                   ((2) (set-frame-rate! *pc-settings* 150))
                   )
                 (set-video-mode (-> *setting-control* default video-mode))
+                )
+               (((game-option-type rng-lib))
+                ;; same thing.
+                (case (-> *progress-carousell* int-backup)
+                  ((0) (set! (-> *randomizer-settings* rng-lib) 'rand-vu))
+                  ((1) (set! (-> *randomizer-settings* rng-lib) 'knuth))
+                  )
+                )
+               (((game-option-type checkpoint-logic))
+                ;; same thing.
+                (case (-> *progress-carousell* int-backup)
+                  ((0) (set! (-> *randomizer-settings* checkpoint-logic) 'logic-random-checkpoint))
+                  ((1) (set! (-> *randomizer-settings* checkpoint-logic) 'logic-random-level))
+                  )
                 )
                )
               (commit-to-file *pc-settings*)
@@ -1535,19 +1701,11 @@
                (sound-volume-off)
                (set! (-> *game-info* mode) 'play)
                ;; Start a new game differently if speedrunning mode is active
-               (cond ((= (-> *pc-settings* speedrunner-mode?) #t)
-                      (update-autosplit-jak1-new-game)
-                      ;; spawn at the warp gate
-                      (initialize! *game-info* 'game (the-as game-save #f) "game-start")
-                      ;; disable hints (this seems to be overriden by your slot 1 save though)
-                      (set! (-> *setting-control* default play-hints) #f)
-                      ;; skip intro cutscene
-                      (close-specific-task! (game-task intro) (task-status need-resolution))
-                      ;; enable auto saving by default
-                      (set! (-> *setting-control* default auto-save) #t))
-                      ;; start the game normally
-                      (else
-                       (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
+               (cond ((-> *pc-settings* speedrunner-mode?)
+                      (speedrun-start-run))
+                     ;; start the game normally
+                     (else
+                      (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
                (set-master-mode 'game)
                )
              )
@@ -1562,19 +1720,11 @@
               (sound-volume-off)
               (set! (-> *game-info* mode) 'play)
               ;; Start a new game differently if speedrunning mode is active
-              (cond ((= (-> *pc-settings* speedrunner-mode?) #t)
-                     (update-autosplit-jak1-new-game)
-                     ;; spawn at the warp gate
-                     (initialize! *game-info* 'game (the-as game-save #f) "game-start")
-                     ;; disable hints (this seems to be overriden by your slot 1 save though)
-                     (set! (-> *setting-control* default play-hints) #f)
-                     ;; skip intro cutscene
-                     (close-specific-task! (game-task intro) (task-status need-resolution))
-                     ;; enable auto saving by default
-                     (set! (-> *setting-control* default auto-save) #t))
-                     ;; start the game normally
-                     (else
-                      (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
+              (cond ((-> *pc-settings* speedrunner-mode?)
+                     (speedrun-start-run))
+                    ;; start the game normally
+                    (else
+                     (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
               (set-master-mode 'game)
               )
              ((nonzero? (-> obj display-state-stack 0))
@@ -1659,19 +1809,11 @@
               (sound-volume-off)
               (set! (-> *game-info* mode) 'play)
               ;; Start a new game differently if speedrunning mode is active
-              (cond ((= (-> *pc-settings* speedrunner-mode?) #t)
-                     (update-autosplit-jak1-new-game)
-                     ;; spawn at the warp gate
-                     (initialize! *game-info* 'game (the-as game-save #f) "game-start")
-                     ;; disable hints (this seems to be overriden by your slot 1 save though)
-                     (set! (-> *setting-control* default play-hints) #f)
-                     ;; skip intro cutscene
-                     (close-specific-task! (game-task intro) (task-status need-resolution))
-                     ;; enable auto saving by default
-                     (set! (-> *setting-control* default auto-save) #t))
-                     ;; start the game normally
-                     (else
-                      (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
+              (cond ((-> *pc-settings* speedrunner-mode?)
+                     (speedrun-start-run))
+                    ;; start the game normally
+                    (else
+                     (initialize! *game-info* 'game (the-as game-save #f) "intro-start")))
               (set-master-mode 'game)
               )
              (else
@@ -1777,6 +1919,10 @@
               (option-y y-off)
               (locked? #f)
               )
+          ;; Check if the option should be disabled
+          (when (and (!= (-> options index option-disabled-func) 0)
+                     ((-> options index option-disabled-func)))
+                (set! locked? #t))
           (case (-> options index option-type)
             (((game-option-type yes-no))
              ;; yes-no option. text is either '->YES<- NO' or 'YES ->NO<-', not the most robust but this option is a strange hack anyway.
@@ -1817,7 +1963,7 @@
              )
             (((game-option-type monitor))
               ;; monitor list
-             (set! option-str 
+             (set! option-str
                    (string-format (lookup-text! *common-text* (-> options index name) #f)
                                   (+ 1 (the int (-> options index param1)))
                                   )
@@ -1849,6 +1995,7 @@
                   )
                  (((game-option-type on-off)
                    (game-option-type normal-inverted)
+                   (game-option-type use-random-seed?)
                    (game-option-type aspect-native))
                   ;; on-off option or some other toggle. same logic as yes-no. changed to cut down code duping.
                   (let (
@@ -1857,12 +2004,16 @@
                                     (lookup-text! *common-text* (game-text-id on) #f))
                                   (((game-option-type normal-inverted))
                                     (lookup-text! *common-text* (game-text-id inverted) #f))
+                                  (((game-option-type use-random-seed?))
+                                    (lookup-text! *common-text* (game-text-id randomizer-random-seed) #f))
                                   ))
                        (off-str (case (-> options index option-type)
                                   (((game-option-type on-off) (game-option-type aspect-native))
                                     (lookup-text! *common-text* (game-text-id off) #f))
                                   (((game-option-type normal-inverted))
                                     (lookup-text! *common-text* (game-text-id normal) #f))
+                                  (((game-option-type use-random-seed?))
+                                    (lookup-text! *common-text* (game-text-id randomizer-set-seed) #f))
                                   ))
                         )
                     (if (-> (the-as (pointer symbol) (-> options index value-to-modify)))
@@ -1885,6 +2036,8 @@
                    (game-option-type frame-rate)
                    (game-option-type language-subtitles)
                    (game-option-type language-text)
+                   (game-option-type rng-lib)
+                   (game-option-type checkpoint-logic)
                    )
                   ;; crunched down to one generic function.
                   (progress-draw-carousell-from-string-list (-> *progress-carousell* current-carousell) font y-off (-> (the-as (pointer int) (-> options index value-to-modify))))
@@ -1976,6 +2129,9 @@
                     (game-option-type speaker)
                     (game-option-type frame-rate)
                     (game-option-type normal-inverted)
+                    (game-option-type use-random-seed?)
+                    (game-option-type rng-lib)
+                    (game-option-type checkpoint-logic)
                     )
                    ;; slider and aspect ratio options just show their text
                    (set! option-str (lookup-text! *common-text* (-> options index name) #f))
@@ -2135,6 +2291,8 @@
 
   0)
 
+(define-extern update-additional-continue-flags (function game-info none))
+
 (defmethod draw-notice-screen progress ((obj progress))
   (hide-progress-icons)
   (when *common-text*
@@ -2276,6 +2434,26 @@
          (hide-progress-icons)
          (draw-options self 115 25 0.65)
          )
+        (((progress-screen randomizer-main-options))
+         (hide-progress-icons)
+            (draw-options self 115 25 0.75)
+         )
+        (((progress-screen randomizer-warp-options))
+         (hide-progress-icons)
+            (draw-options self 115 25 0.75)
+         )
+        (((progress-screen additional-checkpoint-options))
+         (hide-progress-icons)
+            (draw-options self 115 25 0.75)
+         )
+        (((progress-screen challenges-options))
+         (hide-progress-icons)
+         (draw-options self 115 25 0.65)
+         )
+        (((progress-screen mod-options))
+         (hide-progress-icons)
+         (draw-options self 115 25 0.65)
+         )
         (((progress-screen gfx-ps2-options))
          (hide-progress-icons)
          (draw-options self 115 25 0.72)
@@ -2387,7 +2565,8 @@
     (remove-setting! 'music)
     (apply-settings *setting-control*)
     (progress-reset-music-parms)
-    (commit-to-file *pc-settings*)
+    (commit-all-files)
+    (update-additional-continue-flags *game-info*)
     (set! (-> self particles 3 init-pos x) -320.0)
     (set! (-> self particles 4 init-pos x) -320.0)
     (set! (-> self particles 32 init-pos x) -320.0)
@@ -2553,7 +2732,3 @@
     (none)
     )
   )
-
-
-
-

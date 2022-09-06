@@ -1135,7 +1135,7 @@
 
 (defmethod dummy-53 double-lurker ((obj double-lurker) (arg0 vector))
   (let* ((s3-0 (-> obj path curve num-cverts))
-         (s4-0 (rand-vu-int-count s3-0))
+         (s4-0 (mod-rand-int-count s3-0))
          )
     (while (nonzero? s3-0)
       (+! s3-0 -1)

@@ -406,6 +406,8 @@
         (-> self control)
         (-> self control transv)
         (-> self control root-prim collide-with)
+        *collide-cache*
+        *collide-work*
         )
       (+! (-> self racer shock-offsetv) (* (- (-> gp-0 y) (-> self control transv y)) f30-0))
       (+! (-> self racer shock-offsetv)
@@ -622,7 +624,7 @@
 
 (defbehavior racer-buzz target ((arg0 float))
   (let ((f1-0 (lerp-scale 0.2 1.0 (-> self control unknown-float01) 0.0 (-> self racer transv-max))))
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 (the int (* 255.0 (fmin 1.0 (* arg0 f1-0)))) (seconds 0.05))
+    (cpad-set-buzz! (-> self control unknown-cpad-info00) 1 (the int (* 255.0 (fmin 1.0 (* arg0 f1-0)))) (seconds 0.05))
     )
   0
   (none)
@@ -645,7 +647,7 @@
           (lerp-scale 0.0 64.0 (-> self racer front-rotv) 18204.445 364088.88)
           )
     (set! (-> *part-id-table* 2212 init-specs 11 initial-valuef)
-          (- (-> *part-id-table* 2212 init-specs 11 initial-valuef) (* 16.0 (the float (rand-vu-int-range 0 3))))
+          (- (-> *part-id-table* 2212 init-specs 11 initial-valuef) (* 16.0 (the float (mod-rand-int-range 0 3))))
           )
     (when (< 0.0 (-> *part-id-table* 2212 init-specs 11 initial-valuef))
       (set! (-> *part-id-table* 2212 init-specs 14 initial-valuef) (the-as float gp-0))
@@ -661,7 +663,7 @@
           (lerp-scale 0.0 64.0 (-> self racer front-rotv) 18204.445 364088.88)
           )
     (set! (-> *part-id-table* 2212 init-specs 11 initial-valuef)
-          (- (-> *part-id-table* 2212 init-specs 11 initial-valuef) (* 16.0 (the float (rand-vu-int-range 0 3))))
+          (- (-> *part-id-table* 2212 init-specs 11 initial-valuef) (* 16.0 (the float (mod-rand-int-range 0 3))))
           )
     (when (< 0.0 (-> *part-id-table* 2212 init-specs 11 initial-valuef))
       (set! (-> *part-id-table* 2212 init-specs 14 initial-valuef) (the-as float gp-2))
@@ -879,13 +881,13 @@
   (seek! (-> self racer boost-output) (-> self racer boost-target) (* 40960.0 (-> *display* seconds-per-frame)))
   (when (!= (-> self racer boost-output) 0.0)
     (dotimes (gp-7 8)
-      (let ((v1-258 (rand-vu-int-range 3 (+ (-> self node-list length) -1))))
+      (let ((v1-258 (mod-rand-int-range 3 (+ (-> self node-list length) -1))))
         (launch-particles (-> *part-id-table* 2229)
                           (vector<-cspace! (new 'stack-no-clear 'vector) (-> self node-list data v1-258))
                           )
         )
       )
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 0 1 (seconds 0.1))
+    (cpad-set-buzz! (-> self control unknown-cpad-info00) 0 1 (seconds 0.1))
     )
   (when (logtest? (-> self control status) (cshape-moving-flags twall))
     (let* ((gp-8 (racer-find-prop-point (new 'stack-no-clear 'vector) (-> self control unknown-vector70)))
@@ -909,7 +911,7 @@
            )
       (launch-particles a1-54 gp-8)
       )
-    (cpad-set-buzz! (-> *cpad-list* cpads 0) 0 51 (seconds 0.05))
+    (cpad-set-buzz! (-> self control unknown-cpad-info00) 0 51 (seconds 0.05))
     (sound-play-by-name
       (sound-name-with-material 'zoom-hit (-> self control wall-pat) "")
       (-> self racer scrape-sound-id)
@@ -930,7 +932,7 @@
     (set! (-> self racer heat-sound-time) (-> *display* base-frame-counter))
     (sound-play "warning")
     )
-  (when (rand-vu-percent? (/ (-> self racer heat) (-> *RACER-bank* heat-max)))
+  (when (mod-rand-percent? (/ (-> self racer heat) (-> *RACER-bank* heat-max)))
     (let ((a2-28
             (process-drawable-random-point!
               (the-as process-drawable (ppointer->process (-> self manipy)))
@@ -1305,7 +1307,7 @@
                    )
                (when (>= (- (-> *display* base-frame-counter) (-> self racer bob-meta-time)) (seconds 2.2))
                  (set! (-> self racer bob-meta-time) (-> *display* base-frame-counter))
-                 (set! (-> self racer bob-meta-meta-timer) (rand-vu-float-range 0.8 1.2))
+                 (set! (-> self racer bob-meta-meta-timer) (mod-rand-float-range 0.8 1.2))
                  )
                )
              )

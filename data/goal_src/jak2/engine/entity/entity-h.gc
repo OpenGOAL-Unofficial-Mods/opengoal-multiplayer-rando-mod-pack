@@ -16,12 +16,15 @@
   (bit-5 5)
   (subtask-complete 6)
   (bit-7 7)
-  (bit-8 8)
+  (complete 8)
   (bit-9 9)
   (bit-10 10)
   )
 
 (declare-type race-mesh basic)
+
+;; NOTE - for cam-start
+(define-extern reset-cameras (function none))
 
 ;; DECOMP BEGINS
 
@@ -184,9 +187,9 @@
 
 (deftype entity-info (basic)
   ((ptype     type   :offset-assert   4)
-   (package   basic  :offset-assert   8)
+   (package   string  :offset-assert   8)
    (art-group pair   :offset-assert  12)
-   (pool      basic  :offset-assert  16)
+   (pool      symbol  :offset-assert  16)
    (heap-size int32  :offset-assert  20)
    )
   :method-count-assert 9

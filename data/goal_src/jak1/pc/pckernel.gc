@@ -98,7 +98,6 @@
 
 (defmethod set-frame-rate! pc-settings ((obj pc-settings) (rate int))
   "set the target framerate."
-
   (pc-set-frame-rate rate)
   (if (and (!= 'fullscreen (-> obj display-mode))
            (!= (pc-get-screen-rate -1) rate))
@@ -130,10 +129,11 @@
   "commits the current settings to the file"
   ;; auto load settings if available
 
-  (format (clear *pc-temp-string-1*) "~S/pc-settings.gc" *pc-settings-folder*)
+  (format (clear *pc-temp-string-1*) "~S/pc-settings-rando.gc" *pc-settings-folder*)
   (pc-mkdir-file-path *pc-temp-string-1*)
   (write-to-file obj *pc-temp-string-1*)
   (none))
+
 
 (defmethod update-from-os pc-settings ((obj pc-settings))
   "Update settings from the C kernel to GOAL."
@@ -279,7 +279,8 @@
     (set! (-> info money-total) (&-> *game-info* money-total))
     (set! (-> info buzzer-total) (&-> *game-info* buzzer-total))
     (set! (-> info deaths) (&-> *game-info* total-deaths))
-    (set! (-> info status) "Playing Jak and Daxter: The Precursor Legacy™")
+    
+    (set! (-> info status) "Playing Jak™ Powercell Randomizer 0.09")
     (set! (-> info level) (symbol->string (-> (level-get-target-inside *level*) name))) ;; grab the name of level we're in
     (set! (-> info cutscene?) (-> obj movie?))
     (set! (-> info ogreboss?) (aif (process-by-ename "ogreboss-1") (case (-> it next-state name) (
@@ -525,8 +526,16 @@
   (add-to-music-log obj (-> *setting-control* current music) (the int (-> *setting-control* current sound-flava)))
 
   ;; special cases. for example, npc's that despawn and you can't hear their music anymore.
-  (if (task-closed? (game-task beach-ecorocks) (task-status need-introduction))
-      (add-to-music-log obj 'village1 1))
+  (if (task-closed? (game-task village1-buzzer) (task-status need-resolution))
+      (add-to-music-log obj 'village1 (flava-lookup 'village1 (music-flava assistant))))
+  (if (task-closed? (game-task village2-buzzer) (task-status need-resolution))
+      (add-to-music-log obj 'village2 (flava-lookup 'village2 (music-flava assistant))))
+  (if (task-closed? (game-task village3-buzzer) (task-status need-resolution))
+      (add-to-music-log obj 'village3 (flava-lookup 'village3 (music-flava assistant))))
+  (when (task-closed? (game-task beach-ecorocks) (task-status need-introduction))
+      (add-to-music-log obj 'village1 1)
+      (add-to-music-log obj 'village1 (flava-lookup 'village1 (music-flava sage)))
+      )
   (if (task-closed? (game-task jungle-plant) (task-status need-resolution))
       (add-to-music-log obj 'jungleb 2))
   (if (task-closed? (game-task beach-flutflut) (task-status need-resolution))
@@ -539,10 +548,14 @@
       (add-to-music-log obj 'misty 4))
   (if (task-closed? (game-task firecanyon-end) (task-status need-resolution))
       (add-to-music-log obj 'firecanyon 2))
+  (if (task-closed? (game-task village2-levitator) (task-status need-hint))
+      (add-to-music-log obj 'village2 (flava-lookup 'village2 (music-flava sage))))
   (if (task-closed? (game-task swamp-billy) (task-status need-resolution))
       (add-to-music-log obj 'swamp 1))
   (if (task-closed? (game-task swamp-battle) (task-status need-resolution))
       (add-to-music-log obj 'swamp (flava-lookup 'swamp (music-flava swamp-battle))))
+  (if (task-closed? (game-task village3-button) (task-status need-hint))
+      (add-to-music-log obj 'village3 (flava-lookup 'village3 (music-flava sage))))
   (if (task-closed? (game-task snow-bunnies) (task-status need-resolution))
       (add-to-music-log obj 'snow (flava-lookup 'snow (music-flava snow-battle))))
   (if (task-closed? (game-task citadel-sage-yellow) (task-status need-resolution))
@@ -555,6 +568,10 @@
       (add-to-music-log obj 'citadel (flava-lookup 'citadel (music-flava sage))))
   (if (task-closed? (game-task citadel-buzzer) (task-status need-resolution))
       (add-to-music-log obj 'citadel (flava-lookup 'citadel (music-flava assistant))))
+  (when (task-closed? (game-task finalboss-movies) (task-status unknown))
+      (add-to-music-log obj 'finalboss (flava-lookup 'finalboss (music-flava finalboss-middle)))
+      (add-to-music-log obj 'finalboss (flava-lookup 'finalboss (music-flava finalboss-end)))
+      )
   (when (and *target* (>= (float->int (send-event *target* 'query 'pickup (pickup-type fuel-cell))) 100))
       (add-to-music-log obj 'credits 0)
       (add-to-music-log obj 'credits 1)
@@ -562,8 +579,6 @@
       )
 
   0)
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; functions
@@ -694,6 +709,12 @@
   (string->int *pc-temp-string*)
   )
 
+(defun file-stream-read-uint ((file file-stream))
+  (file-stream-seek-past-whitespace file)
+  (file-stream-read-word file)
+  (string->uint *pc-temp-string*)
+  )
+
 (defun file-stream-read-float ((file file-stream))
   (file-stream-seek-past-whitespace file)
   (file-stream-read-word file)
@@ -782,14 +803,15 @@
       (with-settings-scope (file)
         (case-str (file-stream-read-word file)
           (("settings")
-            (set! version (file-stream-read-int file))
+            (set! version (the pckernel-version (file-stream-read-int file)))
             (cond
-              ((= (logand version #xffffffff00000000) (logand PC_KERNEL_VERSION #xffffffff00000000))
+              ((and (= (-> version major) PC_KERNEL_VER_MAJOR)
+                    (= (-> version minor) PC_KERNEL_VER_MINOR))
                 ;; minor difference
                 )
               (else
                 ;; major difference
-                (format 0 "PC kernel version mismatch! Got ~D.~D vs ~D.~D~%" PC_KERNEL_VERSION_MAJOR PC_KERNEL_VERSION_MINOR (bit-field int version 32 16) (bit-field int version 48 16))
+                (format 0 "PC kernel version mismatch! Got ~D.~D vs ~D.~D~%" PC_KERNEL_VER_MAJOR PC_KERNEL_VER_MINOR (-> version major) (-> version minor))
                 (file-stream-close file)
                 (return #f)
                 )
@@ -837,6 +859,8 @@
                 (("lod-force-tie") (set! (-> obj lod-force-tie) (file-stream-read-int file)))
                 (("lod-force-ocean") (set! (-> obj lod-force-ocean) (file-stream-read-int file)))
                 (("lod-force-actor") (set! (-> obj lod-force-actor) (file-stream-read-int file)))
+                (("game-language") (set! (-> *setting-control* default language) (the-as language-enum (file-stream-read-int file))))
+                (("text-language") (set! (-> obj text-language) (the-as pc-subtitle-lang (file-stream-read-int file))))
                 (("subtitle-language") (set! (-> obj subtitle-language) (the-as pc-subtitle-lang (file-stream-read-int file))))
                 (("subtitle-speaker") (set! (-> obj subtitle-speaker?) (file-stream-read-symbol file)))
                 (("stick-deadzone") (set! (-> obj stick-deadzone) (file-stream-read-float file)))
@@ -855,6 +879,7 @@
                 (("hinttitles?") (set! (-> obj hinttitles?) (file-stream-read-symbol file)))
                 (("discord-rpc?") (set! (-> obj discord-rpc?) (file-stream-read-symbol file)))
                 (("speedrunner-mode?") (set! (-> obj speedrunner-mode?) (file-stream-read-symbol file)))
+                (("cutscene-skips?") (set! (-> obj cutscene-skips?) (file-stream-read-symbol file)))
                 (("first-camera-h-inverted?") (set! (-> obj first-camera-h-inverted?) (file-stream-read-symbol file)))
                 (("first-camera-v-inverted?") (set! (-> obj first-camera-v-inverted?) (file-stream-read-symbol file)))
                 (("third-camera-h-inverted?") (set! (-> obj third-camera-h-inverted?) (file-stream-read-symbol file)))
@@ -981,6 +1006,7 @@
     (format file "  (skip-movies? ~A)~%" (-> obj skip-movies?))
     (format file "  (discord-rpc? ~A)~%" (-> obj discord-rpc?))
     (format file "  (speedrunner-mode? ~A)~%" (-> obj speedrunner-mode?))
+    (format file "  (cutscene-skips? ~A)~%" (-> obj cutscene-skips?))
     (format file "  (first-camera-h-inverted? ~A)~%" (-> obj first-camera-h-inverted?))
     (format file "  (first-camera-v-inverted? ~A)~%" (-> obj first-camera-v-inverted?))
     (format file "  (third-camera-h-inverted? ~A)~%" (-> obj third-camera-h-inverted?))
@@ -992,6 +1018,8 @@
     (format file "  (music-fadeout? ~A)~%" (-> obj music-fadeout?))
     (format file "  (subtitles? ~A)~%" (-> obj subtitles?))
     (format file "  (hinttitles? ~A)~%" (-> obj hinttitles?))
+    (format file "  (game-language ~D)~%" (-> *setting-control* default language))
+    (format file "  (text-language ~D)~%" (-> obj text-language))
     (format file "  (subtitle-language ~D)~%" (-> obj subtitle-language))
     (format file "  (subtitle-speaker ~A)~%" (-> obj subtitle-speaker?))
 
@@ -1042,7 +1070,7 @@
 (defmethod load-settings pc-settings ((obj pc-settings))
   "load"
 
-  (format (clear *pc-temp-string-1*) "~S/pc-settings.gc" *pc-settings-folder*)
+  (format (clear *pc-temp-string-1*) "~S/pc-settings-rando.gc" *pc-settings-folder*)
   (if (pc-filepath-exists? *pc-temp-string-1*)
     (begin
       (format 0 "[PC] PC Settings found at '~S'...loading!~%" *pc-temp-string-1*)
@@ -1063,13 +1091,259 @@
 
     obj))
 
+(defmethod new challenges-settings ((allocation symbol) (type-to-make type))
+  "make a new challenges-settings"
+  (let ((obj (object-new allocation type-to-make (the-as int (-> type-to-make size)))))
+    (reset obj)
+    ;; auto load settings if available
+    ;; if saved settings are corrupted or not found, use defaults
+    (load-settings obj)
+    obj))
+
+(defmethod new randomizer-settings ((allocation symbol) (type-to-make type))
+  "make a new randomizer-settings"
+  (let ((obj (object-new allocation type-to-make (the-as int (-> type-to-make size)))))
+    (reset obj)
+    ;; auto load settings if available
+    ;; if saved settings are corrupted or not found, use defaults
+    (load-settings obj)
+    obj))
+
+(defmethod read-from-file randomizer-settings ((obj randomizer-settings) (filename string))
+  "read settings from a file"
+
+  (if (not filename)
+    (return #f))
+
+  (let ((file (new 'stack 'file-stream filename 'read)))
+    (when (not (file-stream-valid? file))
+      (return #f))
+
+    ;;Check version
+    (let ((version RANDO_SETTINGS_VERSION))
+      (with-settings-scope (file)
+        (case-str (file-stream-read-word file)
+          (("settings")
+            (set! version (file-stream-read-int file))
+            (cond
+              ((= (logand version #xffffffff00000000) (logand RANDO_SETTINGS_VERSION #xffffffff00000000))
+                ;; minor difference
+                )
+              (else
+                ;; major difference
+                (format 0 "Randomizer settings version mismatch! Got ~D.~D vs ~D.~D~%" RANDO_SETTINGS_VERSION_MAJOR RANDO_SETTINGS_VERSION_MINOR (bit-field int version 32 16) (bit-field int version 48 16))
+                (file-stream-close file)
+                (return #f)
+                )
+              )
+            ;;read through the file and set fields
+            (dosettings (file)
+              (case-str *pc-temp-string*
+                (("Randomizer?") (set! (-> obj checkpoint-randomizer?) (file-stream-read-symbol file)))
+                ;; left as "cells-needed-to-warp" in settings for backwards compatibility
+                (("cells-needed-to-warp") (set! (-> obj collectables-needed-to-warp) (file-stream-read-float file)))
+                (("show-warp-counter?") (set! (-> obj show-warp-counter?) (file-stream-read-symbol file)))
+                (("use-random-seed?") (set! (-> obj use-random-seed?) (file-stream-read-symbol file)))
+                (("Seed") (set! (-> obj current-seed) (file-stream-read-uint file)))
+                (("backup-checkpoints-used") (set! (-> obj backup-checkpoints-used) (file-stream-read-int file)))
+                (("WarpOnCell?") (set! (-> obj warp-on-cell?) (file-stream-read-symbol file)))
+                (("WarpOnOrb?") (set! (-> obj warp-on-orb?) (file-stream-read-symbol file)))
+                (("WarpOnBuzzer?") (set! (-> obj warp-on-buzzer?) (file-stream-read-symbol file)))
+                (("WarpOnGreenEco?") (set! (-> obj warp-on-green-eco?) (file-stream-read-symbol file)))
+                (("WarpOnBlueEco?") (set! (-> obj warp-on-blue-eco?) (file-stream-read-symbol file)))
+                (("WarpOnRedEco?") (set! (-> obj warp-on-red-eco?) (file-stream-read-symbol file)))
+                (("WarpOnYellowEco?") (set! (-> obj warp-on-yellow-eco?) (file-stream-read-symbol file)))
+                (("WarpOnEcoVents?") (set! (-> obj warp-on-eco-vents?) (file-stream-read-symbol file)))
+                (("WarpOnDeath?") (set! (-> obj warp-on-death?) (file-stream-read-symbol file)))
+                (("rng-lib") (set! (-> obj rng-lib) (file-stream-read-symbol file)))
+                (("checkpoint-logic") (set! (-> obj checkpoint-logic) (file-stream-read-symbol file)))
+
+                )
+              )
+            )
+          )
+        )
+
+      )
+      (inspect file)
+    (file-stream-close file)
+    )
+
+  (format 0 "pc settings file read: ~A~%" filename)
+
+  #t
+  )
+  
+(defmethod load-settings randomizer-settings ((obj randomizer-settings))
+  "load"
+
+  (format (clear *pc-temp-string-1*) "~S/Mods/randomizer-settings.gc" *pc-settings-folder*)
+  (if (pc-filepath-exists? *pc-temp-string-1*)
+    (begin
+      (format 0 "[Randomizer] Randomizer Settings found at '~S'...loading!~%" *pc-temp-string-1*)
+      (unless (read-from-file obj *pc-temp-string-1*)
+        (format 0 "[Randomizer] Randomizer Settings found at '~S' but could not be loaded, using defaults!~%" *pc-temp-string-1*)
+        (reset obj)))
+    (format 0 "[Randomizer] Randomizer Settings not found at '~S'...initializing with defaults!~%" *pc-temp-string-1*))
+  0)
+
+
+(defmethod read-from-file challenges-settings ((obj challenges-settings) (filename string))
+  "read settings from a file"
+ 
+  (if (not filename)
+    (return #f))
+ 
+  (let ((file (new 'stack 'file-stream filename 'read)))
+    (when (not (file-stream-valid? file))
+      (return #f))
+ 
+    ;;Check settings verion
+    (let ((version RANDO_SETTINGS_VERSION))
+      (with-settings-scope (file)
+        (case-str (file-stream-read-word file)
+          (("settings")
+            (set! version (file-stream-read-int file))
+            (cond
+              ((= (logand version #xffffffff00000000) (logand RANDO_SETTINGS_VERSION #xffffffff00000000))
+                ;; minor difference
+                )
+              (else
+                ;; major difference
+                (format 0 "Challenges settings version mismatch! Got ~D.~D vs ~D.~D~%" RANDO_SETTINGS_VERSION_MAJOR RANDO_SETTINGS_VERSION_MINOR (bit-field int version 32 16) (bit-field int version 48 16))
+                (file-stream-close file)
+                (return #f)
+                )
+              )
+            ;; Read file and set values.
+            (dosettings (file)
+              (case-str *pc-temp-string*
+                (("hardcore?") (set! (-> obj challenges-hardcore?) (file-stream-read-symbol file)))
+                (("orbless?") (set! (-> obj challenges-orbless?) (file-stream-read-symbol file)))
+                (("damageless?") (set! (-> obj challenges-damageless?) (file-stream-read-symbol file)))
+                (("pacifist?") (set! (-> obj challenges-pacifist?) (file-stream-read-symbol file)))
+                (("bonkless?") (set! (-> obj challenges-bonkless?) (file-stream-read-symbol file)))
+                (("casual?") (set! (-> obj challenges-casual?) (file-stream-read-symbol file)))
+                (("mirrormode?") (set! (-> obj challenges-mirrormode?) (file-stream-read-symbol file)))
+                (("smalljak?") (set! (-> obj challenges-smalljak?) (file-stream-read-symbol file)))
+                (("bigjak?") (set! (-> obj challenges-bigjak?) (file-stream-read-symbol file)))
+                (("flatjak?") (set! (-> obj challenges-flatjak?) (file-stream-read-symbol file)))
+                (("paperjak?") (set! (-> obj challenges-paperjak?) (file-stream-read-symbol file)))
+                )
+              )
+            )
+          )
+        )
+ 
+      )
+      (inspect file)
+    (file-stream-close file)
+    )
+ 
+  (format 0 "pc settings file read: ~A~%" filename)
+ 
+  #t
+  )
+ 
+(defmethod load-settings challenges-settings ((obj challenges-settings))
+  "load"
+ 
+  (format (clear *pc-temp-string-1*) "~S/Mods/challenges-settings.gc" *pc-settings-folder*)
+  (if (pc-filepath-exists? *pc-temp-string-1*)
+    (begin
+      (format 0 "[Challenges] Challenges Settings found at '~S'...loading!~%" *pc-temp-string-1*)
+      (unless (read-from-file obj *pc-temp-string-1*)
+        (format 0 "[Challenges] Challenges Settings found at '~S' but could not be loaded, using defaults!~%" *pc-temp-string-1*)
+        (reset obj)))
+    (format 0 "[Challenges] Challenges Settings not found at '~S'...initializing with defaults!~%" *pc-temp-string-1*))
+  0)
+ 
+(defmethod new mods-settings ((allocation symbol) (type-to-make type))
+  "make a new mods-settings"
+  (let ((obj (object-new allocation type-to-make (the-as int (-> type-to-make size)))))
+    (reset obj)
+    ;; auto load settings if available
+    ;; if saved settings are corrupted or not found, use defaults
+    (load-settings obj)
+    obj))
+
+(defmethod read-from-file mods-settings ((obj mods-settings) (filename string))
+  "read settings from a file"
+
+  (if (not filename)
+    (return #f))
+
+  (let ((file (new 'stack 'file-stream filename 'read)))
+    (when (not (file-stream-valid? file))
+      (return #f))
+
+    ;;Check version
+    (let ((version RANDO_SETTINGS_VERSION))
+      (with-settings-scope (file)
+        (case-str (file-stream-read-word file)
+          (("settings")
+            (set! version (file-stream-read-int file))
+            (cond
+              ((= (logand version #xffffffff00000000) (logand RANDO_SETTINGS_VERSION #xffffffff00000000))
+                ;; minor difference
+                )
+              (else
+                ;; major difference
+                (format 0 "Mods settings version mismatch! Got ~D.~D vs ~D.~D~%" RANDO_SETTINGS_VERSION_MAJOR RANDO_SETTINGS_VERSION_MINOR (bit-field int version 32 16) (bit-field int version 48 16))
+                (file-stream-close file)
+                (return #f)
+                )
+              )
+              ;;read through the file and set fields
+            (dosettings (file)
+              (case-str *pc-temp-string*
+                (("powercellcutscenes?") (set! (-> obj mod-powercellcutscenes?) (file-stream-read-symbol file)))
+                
+                (("checkpoint-training-far") (set! (-> obj checkpoint-training-far) (file-stream-read-symbol file)))
+                (("checkpoint-village1-far") (set! (-> obj checkpoint-village1-far) (file-stream-read-symbol file)))
+                (("checkpoint-beach-pelican") (set! (-> obj checkpoint-beach-pelican) (file-stream-read-symbol file)))
+                (("checkpoint-beach-far") (set! (-> obj checkpoint-beach-far) (file-stream-read-symbol file)))
+                (("checkpoint-jungle-far") (set! (-> obj checkpoint-jungle-far) (file-stream-read-symbol file)))
+                (("checkpoint-swamp-flutflut") (set! (-> obj checkpoint-swamp-flutflut) (file-stream-read-symbol file)))
+                (("checkpoint-village3-cart") (set! (-> obj checkpoint-village3-cart) (file-stream-read-symbol file)))
+                )
+              )
+            )
+          )
+        )
+
+      )
+      (inspect file)
+    (file-stream-close file)
+    )
+
+  (format 0 "pc settings file read: ~A~%" filename)
+
+  #t
+  )
+
+(defmethod load-settings mods-settings ((obj mods-settings))
+  "load"
+  (format (clear *pc-temp-string-1*) "~S/Mods/mods-settings.gc" *pc-settings-folder*)
+  (if (pc-filepath-exists? *pc-temp-string-1*)
+    (begin
+      (format 0 "[Randomizer] Randomizer Settings found at '~S'...loading!~%" *pc-temp-string-1*)
+      (unless (read-from-file obj *pc-temp-string-1*)
+        (format 0 "[Randomizer] Randomizer Settings found at '~S' but could not be loaded, using defaults!~%" *pc-temp-string-1*)
+        (reset obj)))
+    (format 0 "[Randomizer] Randomizer Settings not found at '~S'...initializing with defaults!~%" *pc-temp-string-1*))
+  0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; PC settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+;; This is the settings object, all new settings types must be initalized here.
 (define *pc-settings* (new 'global 'pc-settings))
+(define *randomizer-settings* (new 'global 'randomizer-settings))
+(define *challenges-settings* (new 'global 'challenges-settings))
+(define *mods-settings* (new 'global 'mods-settings))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; entity debugging
@@ -1137,8 +1411,8 @@
 
 ) ;; when debug_segment
 
-(defun-debug draw-build-revision ()
-  (with-dma-buffer-add-bucket ((buf (-> (current-frame) debug-buf))
+(defun draw-build-revision ()
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf))
                                      (bucket-id debug-no-zbuf))
           (draw-string-xy *pc-settings-built-sha*
                           buf
@@ -1156,7 +1430,6 @@
 
 ;; the actor pool for PC processes! it has space for 4 processes, with 16K of space.
 (define *pc-dead-pool* (new 'global 'dead-pool 4 (* 16 1024) '*pc-dead-pool*))
-
 
 
 
