@@ -290,7 +290,7 @@
            arg2
            (the-as attack-info (-> arg3 param 1))
            arg0
-           (the-as process (-> arg3 param 0))
+           (the-as touching-shapes-entry (-> arg3 param 0))
            target-flut-hit
            )
          )
@@ -361,7 +361,7 @@
          (target-send-attack
            arg0
            (the-as uint (-> self control unknown-symbol30))
-           (-> arg3 param 0)
+           (the-as touching-shapes-entry (-> arg3 param 0))
            (-> self control unknown-dword50)
            (-> self control unknown-dword51)
            )
@@ -373,7 +373,7 @@
        arg2
        (the-as attack-info (-> arg3 param 1))
        arg0
-       (the-as process (-> arg3 param 0))
+       (the-as touching-shapes-entry (-> arg3 param 0))
        target-flut-hit
        )
      )
@@ -774,7 +774,7 @@
       (when (target-send-attack
               arg0
               (the-as uint 'flut-bonk)
-              (-> arg3 param 0)
+              (the-as touching-shapes-entry (-> arg3 param 0))
               (-> self control unknown-dword50)
               (-> self control unknown-dword51)
               )
@@ -1163,7 +1163,7 @@
           (let ((gp-1 (target-send-attack
                         arg0
                         (the-as uint (-> self control unknown-symbol30))
-                        (-> arg3 param 0)
+                        (the-as touching-shapes-entry (-> arg3 param 0))
                         (-> self control unknown-dword50)
                         (-> self control unknown-dword51)
                         )
@@ -1244,6 +1244,7 @@
               265
               )
           #f
+          self
           :to self
           )
         )
@@ -1629,7 +1630,7 @@
   :trans (behavior ()
     (when (= *cheat-mode* 'debug)
       (when (and (not *pause-lock*) (cpad-hold? (-> self control unknown-cpad-info00 number) r2))
-        (pickup-collectable! (-> self fact-info-target) (pickup-type eco-green) (the-as float 1.0) (the-as handle #f))
+        (pickup-collectable! (-> self fact-info-target) (pickup-type eco-green) (the-as float 1.0) (the-as handle #f) self)
         (go target-flut-stance)
         )
       )
@@ -1706,6 +1707,7 @@
                    (pickup-type eco-green)
                    (the-as float -1000.0)
                    (the-as handle #f)
+                   self
                    )
                  (go target-flut-death (-> gp-0 mode))
                  )
@@ -1717,6 +1719,7 @@
                (pickup-type eco-green)
                (the-as float -1000.0)
                (the-as handle #f)
+               self
                )
              (if (= (-> self game mode) 'play)
                  (go target-flut-death (-> gp-0 mode))
@@ -1728,6 +1731,7 @@
                (pickup-type eco-green)
                (the-as float -1000.0)
                (the-as handle #f)
+               self
                )
              )
             (else
@@ -1736,6 +1740,7 @@
                 (pickup-type eco-green)
                 (- (-> *FACT-bank* health-single-inc))
                 (the-as handle #f)
+                self
                 )
               )
             )

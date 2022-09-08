@@ -557,7 +557,7 @@
                             )
                       (t2-0 #f)
                       )
-                  ((the-as (function object object object object object object object none) s3-0)
+                  ((the-as (function object object object object object object object object none) s3-0)
                    s2-0
                    s1-0
                    s0-0
@@ -565,6 +565,7 @@
                    gp-1
                    t1-0
                    t2-0
+                   self
                    )
                   )
                 )
@@ -713,7 +714,7 @@
                             )
                       (t2-0 #f)
                       )
-                  ((the-as (function object object object object object object object none) s3-0)
+                  ((the-as (function object object object object object object object object none) s3-0)
                    s2-0
                    s1-0
                    s0-0
@@ -721,6 +722,7 @@
                    gp-1
                    t1-0
                    t2-0
+                   self
                    )
                   )
                 )
@@ -1420,6 +1422,7 @@
                                  9
                                  )
                              #f
+                             self
                              )
                            (-> gp-1 ppointer)
                            )
@@ -1546,6 +1549,7 @@
           0
           )
       #f
+      self
       :to self
       )
     (set! (-> self control unknown-dword82) (-> *display* base-frame-counter))
@@ -2556,6 +2560,7 @@
           (pickup-type eco-green)
           (* (-> *FACT-bank* health-single-inc) (- (fmax 0.0 f0-5)))
           (the-as handle #f)
+          self
           )
         )
       (if (zero? (logand (-> self control unknown-cpad-info00 button0-abs 0) (pad-buttons l3)))

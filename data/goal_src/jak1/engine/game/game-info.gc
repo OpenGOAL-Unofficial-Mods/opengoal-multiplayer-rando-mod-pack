@@ -555,7 +555,7 @@
 
 (declare-type vent process-drawable)
 
-(defmethod pickup-collectable! fact-info-target ((obj fact-info-target) (kind pickup-type) (amount float) (source-handle handle))
+(defmethod pickup-collectable! fact-info-target ((obj fact-info-target) (kind pickup-type) (amount float) (source-handle handle) (tgt process))
   "Pickup a thing!"
   (case kind
     (((pickup-type eco-green))
@@ -589,6 +589,7 @@
               (pickup-type eco-pill)
               (-> *FACT-bank* eco-pill-max-default)
               (process->handle (-> obj process))
+              tgt
               )
             )
 
@@ -603,19 +604,19 @@
 
          ;; not sure why we do this. But this will set the eco pill collection time.
          (if (>= amount -10.0)
-             (pickup-collectable! obj (pickup-type eco-pill) 0.0 source-handle)
+             (pickup-collectable! obj (pickup-type eco-pill) 0.0 source-handle tgt)
              )
 
          ;; subtract lives.
          (if (= (-> obj health) 0.0)
-             (adjust (-> (the-as target (-> obj process)) game) 'life (- (-> *GAME-bank* life-single-inc)) source-handle)
+             (adjust (-> (the-as target tgt) game) 'life (- (-> *GAME-bank* life-single-inc)) source-handle)
              )
          )
        )
 
      ;; some sort of hack for eco vents.
      (b!
-       (and (logtest? (-> (the-as collide-shape (-> obj process root)) root-prim prim-core action) (collide-action ca-9))
+       (and (logtest? (-> (the-as collide-shape (-> (the-as target tgt) root)) root-prim prim-core action) (collide-action ca-9))
             (type-type? (-> (handle->process source-handle) type) vent)
             )
        cfg-80
@@ -623,7 +624,7 @@
        )
      (-> obj health)
 
-     (adjust (-> (the-as target (-> obj process)) game) 'eco-green amount source-handle)
+     (adjust (-> (the-as target tgt) game) 'eco-green amount source-handle)
      )
 
     (((pickup-type eco-pill))
@@ -644,11 +645,12 @@
            (pickup-type eco-green)
            (-> *FACT-bank* health-small-inc)
            (process->handle (-> obj process))
+           tgt
            )
          )
         (begin
           ;; only increment green-eco-total if this didn't result in big health pickup
-          (adjust (-> (the-as target (-> obj process)) game) 'eco-pill amount source-handle)
+          (adjust (-> (the-as target tgt) game) 'eco-pill amount source-handle)
          )
        )
        )
@@ -675,23 +677,23 @@
        )
        (set! (-> obj money-pickup-time) (-> *display* base-frame-counter))
        )
-     (adjust (-> (the-as target (-> obj process)) game) 'money amount source-handle)
+     (adjust (-> (the-as target tgt) game) 'money amount source-handle)
      )
     (((pickup-type fuel-cell))
      ;; the amount is actually the index of the task.
      (let ((s4-2 (the int amount)))
-       (if (not (or (task-complete? (-> (the-as target (-> obj process)) game) (the-as game-task s4-2))
+       (if (not (or (task-complete? (-> (the-as target tgt) game) (the-as game-task s4-2))
                     (>= (the-as uint 1) (the-as uint s4-2))
                     )
                 )
            (set! (-> obj fuel-cell-pickup-time) (-> *display* base-frame-counter))
            )
        )
-     (adjust (-> (the-as target (-> obj process)) game) 'fuel-cell amount source-handle)
+     (adjust (-> (the-as target tgt) game) 'fuel-cell amount source-handle)
      )
     (((pickup-type buzzer))
      ;; buzzer
-     (let ((buzz-count (adjust (-> (the-as target (-> obj process)) game) 'buzzer amount source-handle)))
+     (let ((buzz-count (adjust (-> (the-as target tgt) game) 'buzzer amount source-handle)))
        (if (!= buzz-count (-> obj buzzer))
            (set! (-> obj buzzer-pickup-time) (-> *display* base-frame-counter))
            )
@@ -730,7 +732,7 @@
          (set! (-> obj eco-pickup-time) (-> *display* game-frame-counter))
 
          ;; send a reset-collide message. Not sure why we do this.
-         (send-event (-> obj process) 'reset-collide)
+         (send-event tgt 'reset-collide)
          )
 
        ;; this logic prevents eco from respawning before you are out.
@@ -756,8 +758,8 @@
                        (< (- (-> *display* base-frame-counter) (-> obj eco-source-time)) (seconds 0.5))
                        )
                   )
-         (cpad-set-buzz! (-> (the-as target (-> obj process)) control unknown-cpad-info00) 1 127 (seconds 0.2))
-         (cpad-set-buzz! (-> (the-as target (-> obj process)) control unknown-cpad-info00) 0 17 (seconds 0.2))
+         (cpad-set-buzz! (-> (the-as target tgt) control unknown-cpad-info00) 1 127 (seconds 0.2))
+         (cpad-set-buzz! (-> (the-as target tgt) control unknown-cpad-info00) 0 17 (seconds 0.2))
          (case kind
            (((pickup-type eco-blue))
             (sound-play "get-blue-eco")
@@ -780,7 +782,7 @@
        ;; special case for blue eco magnet effect
        (when (= kind (pickup-type eco-blue))
          (when (= eco-lev 0.0)
-           (let ((s5-1 (-> obj process)))
+           (let ((s5-1 (the-as target tgt)))
              (let ((s4-3
                      (process-spawn
                        touch-tracker
@@ -830,23 +832,23 @@
      (when (> amount 0.0)
       (case kind
             (((pickup-type eco-blue))
-              (adjust (-> (the-as target (-> obj process)) game) 'eco-blue amount source-handle)
+              (adjust (-> (the-as target tgt) game) 'eco-blue amount source-handle)
               )
             (((pickup-type eco-green))
-              (adjust (-> (the-as target (-> obj process)) game) 'eco-green amount source-handle)
+              (adjust (-> (the-as target tgt) game) 'eco-green amount source-handle)
               )
             (((pickup-type eco-yellow))
-              (adjust (-> (the-as target (-> obj process)) game) 'eco-yellow amount source-handle)
+              (adjust (-> (the-as target tgt) game) 'eco-yellow amount source-handle)
               )
             (((pickup-type eco-red))
-              (adjust (-> (the-as target (-> obj process)) game) 'eco-red amount source-handle)
+              (adjust (-> (the-as target tgt) game) 'eco-red amount source-handle)
               )
             )
       )
      (-> obj eco-level)
      )
     (else
-      ((method-of-type fact-info pickup-collectable!) obj kind amount source-handle)
+      ((method-of-type fact-info pickup-collectable!) obj kind amount source-handle tgt)
       )
     )
   )

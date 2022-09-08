@@ -723,16 +723,14 @@
 
       (with-profiler "menu"
         (with-pc
-          (cond ((and (= (-> *pc-settings* speedrunner-mode?) #t)
-                      (< (-> *autosplit-info-jak1* num-power-cells) 1))
-                 ;; display the revision before you collect your first powercell
-                 (draw-build-revision))
-                ((and (-> *pc-settings* display-sha) (-> *randomizer-settings* checkpoint-randomizer?))
+          (cond ((and (-> *pc-settings* display-sha) (-> *randomizer-settings* checkpoint-randomizer?))
                  ;; display the revision in randomizer mode
                  (draw-build-revision))
                 ((and (-> *pc-settings* display-sha) *debug-segment*)
                  ;; otherwise, only draw if we are in debug mode and the setting isn't enabled
-                 (draw-build-revision))))
+                 (draw-build-revision))
+                )
+          )
         (*menu-hook*)
         (add-ee-profile-frame 'draw :g #x40)
 

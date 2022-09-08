@@ -111,7 +111,7 @@
     (new (symbol type process-drawable pickup-type float) _type_ 0)
     (drop-pickup (_type_ symbol process-tree fact-info int) (pointer process) 9)
     (reset! (_type_ symbol) none 10)
-    (pickup-collectable! (_type_ pickup-type float handle) float 11)
+    (pickup-collectable! (_type_ pickup-type float handle process) float 11)
     )
   )
 
@@ -219,7 +219,7 @@
     )
   )
 
-(defmethod pickup-collectable! fact-info ((obj fact-info) (arg0 pickup-type) (arg1 float) (arg2 handle))
+(defmethod pickup-collectable! fact-info ((obj fact-info) (arg0 pickup-type) (arg1 float) (arg2 handle) (tgt process))
   0.0
   )
 

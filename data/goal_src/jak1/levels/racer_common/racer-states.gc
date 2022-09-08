@@ -41,7 +41,7 @@
                    arg2
                    (the-as attack-info (-> arg3 param 1))
                    arg0
-                   (the-as process (-> arg3 param 0))
+                   (the-as touching-shapes-entry (-> arg3 param 0))
                    (the-as (state symbol attack-info target) target-racing-hit)
                    )
                  )
@@ -794,7 +794,7 @@
     (combine! (-> self attack-info) arg1)
     (case (-> self attack-info mode)
       (('endlessfall 'death 'explode 'water-vol 'heat 'melt 'instant-death)
-       (pickup-collectable! (-> self fact-info-target) (pickup-type eco-green) -1000.0 (the-as handle #f))
+       (pickup-collectable! (-> self fact-info-target) (pickup-type eco-green) -1000.0 (the-as handle #f) self)
        )
       (else
         (pickup-collectable!
@@ -802,6 +802,7 @@
           (pickup-type eco-green)
           (- (-> *FACT-bank* health-single-inc))
           (the-as handle #f)
+          self
           )
         )
       )
