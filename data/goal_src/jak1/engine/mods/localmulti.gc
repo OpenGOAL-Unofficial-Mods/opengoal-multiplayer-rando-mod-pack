@@ -41,20 +41,28 @@
 )
 
 (defun check-multi-jak-dist ((jak target))
-  (define xyz-dist 0.0)
-  (define  xz-dist 0.0)
-  (define   y-dist 0.0)
-  (define j-vec (new 'static 'vector))
-  
-  (set! (-> j-vec x) (-> (-> jak root) trans x))
-  (set! (-> j-vec y) (-> (-> jak root) trans y))
-  (set! (-> j-vec z) (-> (-> jak root) trans z))
+  (case (-> jak state)
+    ((target-launch target-duck-high-jump target-duck-high-jump-jump)
+      ;; don't warp targets that are currently in a launch / high jump
+      #f
+      )
+    (else
+      (let ((xyz-dist 0.0)
+            (xz-dist 0.0)
+            (y-dist 0.0)
+            (j-vec (new 'static 'vector)))
+        (set! (-> j-vec x) (-> (-> jak root) trans x))
+        (set! (-> j-vec y) (-> (-> jak root) trans y))
+        (set! (-> j-vec z) (-> (-> jak root) trans z))
 
-  (set! xyz-dist (vector-vector-distance j-vec (target-pos 0)) )
-  (set!  xz-dist (vector-vector-xz-distance j-vec (target-pos 0)) )
-  (set!   y-dist (- (-> (target-pos 0) y) (-> j-vec y)) )
+        (set! xyz-dist (vector-vector-distance j-vec (target-pos 0)) )
+        (set!  xz-dist (vector-vector-xz-distance j-vec (target-pos 0)) )
+        (set!   y-dist (- (-> (target-pos 0) y) (-> j-vec y)) )
 
-  (> xyz-dist (meters 55.0))
+        (> xyz-dist (meters 75.0))
+        )
+      )
+    )
 )
 
 (defun localmulti-run-eachframe()
@@ -92,15 +100,22 @@
       )
     )
 
-  ;;Warp side jaks to main Jak if too far
+  ;;Warp side jaks to main Jak if holding all shoulder buttons, or just too far
   (dotimes (tgt-idx (-> *target-list* length))
     (let ((tgt (get-target tgt-idx)))
-      (if (and (> tgt-idx 0) (target-alive? tgt) (check-multi-jak-dist tgt))
-        (warp-jakA-to-jakB tgt *target*)
+      (when (and (> tgt-idx 0) (get-target tgt-idx))
+        (cond
+          ((and (cpad-hold? tgt-idx l1) (cpad-hold? tgt-idx l2) (cpad-hold? tgt-idx r1) (cpad-hold? tgt-idx r2))
+            (warp-jakA-to-jakB tgt *target*)
+            )
+          ((and (target-alive? tgt) (check-multi-jak-dist tgt))
+            (warp-jakA-to-jakB tgt *target*)
+            )
+          )
         )
       )
     )
-  
+
   (none)
   )
 

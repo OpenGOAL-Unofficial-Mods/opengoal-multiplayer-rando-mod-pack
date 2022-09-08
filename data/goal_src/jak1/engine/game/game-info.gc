@@ -782,49 +782,53 @@
        ;; special case for blue eco magnet effect
        (when (= kind (pickup-type eco-blue))
          (when (= eco-lev 0.0)
-           (let ((s5-1 (the-as target tgt)))
-             (let ((s4-3
-                     (process-spawn
-                       touch-tracker
-                       :init touch-tracker-init
-                       (-> s5-1 root trans)
-                       (-> *FACT-bank* suck-bounce-dist)
-                       (seconds 1)
-                       :to s5-1
-                       )
-                     )
-                   )
-               (send-event (ppointer->process s4-3) 'target s5-1)
-               (send-event (ppointer->process s4-3) 'event 'eco-blue)
-               (send-event (ppointer->process s4-3) 'exit (lambda () (send-event *target* 'query 'powerup (pickup-type eco-blue))))
-               (send-event
-                 (ppointer->process s4-3)
-                 'eval
-                 (lambda :behavior process-drawable
-                   ()
-                   (set! (-> (the-as collide-shape (-> self root)) root-prim collide-with)
-                         (collide-kind cak-1 cak-2 cak-3 blue-eco-suck)
-                         )
-                   (none)
-                   )
-                 )
-               )
-             (process-spawn-function
-               process
-               (lambda ((arg0 process-drawable))
-                 (let ((s5-0 (-> *display* base-frame-counter)))
-                   (until (>= (- (-> *display* base-frame-counter) s5-0) (seconds 0.6))
-                     (send-event arg0 'effect 'eco-blue)
-                     (suspend)
-                     )
-                   )
-                 (none)
-                 )
-               s5-1
-               :from *4k-dead-pool*
-               :to s5-1
-               )
-             )
+           (dotimes (tgt-idx (-> *target-list* length))
+            (when (get-target tgt-idx)
+              (let ((s5-1 (get-target tgt-idx)))
+                (let ((s4-3
+                        (process-spawn
+                          touch-tracker
+                          :init touch-tracker-init
+                          (-> s5-1 root trans)
+                          (-> *FACT-bank* suck-bounce-dist)
+                          (seconds 1)
+                          :to s5-1
+                          )
+                        )
+                      )
+                  (send-event (ppointer->process s4-3) 'target s5-1)
+                  (send-event (ppointer->process s4-3) 'event 'eco-blue)
+                  (send-event (ppointer->process s4-3) 'exit (lambda :behavior touch-tracker () (send-event (handle->process (-> self target)) 'query 'powerup (pickup-type eco-blue))))
+                  (send-event
+                    (ppointer->process s4-3)
+                    'eval
+                    (lambda :behavior process-drawable
+                      ()
+                      (set! (-> (the-as collide-shape (-> self root)) root-prim collide-with)
+                            (collide-kind cak-1 cak-2 cak-3 blue-eco-suck)
+                            )
+                      (none)
+                      )
+                    )
+                  )
+                (process-spawn-function
+                  process
+                  (lambda ((arg0 process-drawable))
+                    (let ((s5-0 (-> *display* base-frame-counter)))
+                      (until (>= (- (-> *display* base-frame-counter) s5-0) (seconds 0.6))
+                        (send-event arg0 'effect 'eco-blue)
+                        (suspend)
+                        )
+                      )
+                    (none)
+                    )
+                  s5-1
+                  :from *4k-dead-pool*
+                  :to s5-1
+                  )
+                )
+              )
+            )
            )
          )
        )
