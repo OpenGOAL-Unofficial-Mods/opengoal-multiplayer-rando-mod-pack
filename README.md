@@ -1,9 +1,5 @@
-# OpenGoal-Mod-Base
-Serves as a base template for openGOAL mods that will be supported via [opengoal-mod-launcher](https://github.com/OpenGOAL-Unofficial-Mods/opengoal-mod-launcher).
+# OpenGoal Multiplayer (& Randomizer) mod pack
+A version of https://github.com/OpenGOAL-Unofficial-Mods/opengoal-randomizer-mod-pack with EXPERIMENTAL local multiplayer functionality.
 
-- Please ensure you are not committing copyrighted material to your repo (the `.gitignore` should help prevent this). 
-- Generally speaking you should only be updating certain directories/files:
-  - the executable binaries (`goalc.exe`, `gk.exe`, `extractor.exe`)
-  - GOAL code (`/data/goal_src`)
-  - Assets specific to the PC Port (`/data/game/assets/jak1/`)
-  - Decompiler config (`/data/decompiler/config`)
+- To spawn/despawn additional Jaks: on your second/third/fourth controller, hold L3 and enter the first part of the debug cheat code on the Dpad (UUDDLRLR)
+- For "remote" multiplayer, check out Steam Remote Play. You can use it with non-Steam games by following https://steamcommunity.com/discussions/forum/0/1609400247641606598/
