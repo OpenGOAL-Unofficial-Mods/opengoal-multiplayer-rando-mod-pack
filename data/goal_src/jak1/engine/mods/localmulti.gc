@@ -68,7 +68,11 @@
 (defun localmulti-run-eachframe()
   ;;If the camera is not focus on the main target (id 1375524), then set the cameras focus to the  main target.
   ;;todo this breaks pelican cutscene we can easily fix later.
-  (if (and (extra-target-alive?) (!= (-> *camera* drawable-target) *target*))
+  (when (and
+          (extra-target-alive?)
+          (!= (-> *camera* drawable-target) *target*)
+          (!= (-> *target* state name) 'target-pole-cycle)
+          )
     (set! (-> *camera* drawable-target) (the-as handle *target*))
     )
 
@@ -95,7 +99,9 @@
         )
       )
     ;;If the camera is not set to cam-stick, and we have more than one jak, then set it to cam-stick
-    ((and (extra-target-alive?) (= (-> (-> (-> (the-as (pointer camera-slave) (-> *camera* child))) state) name) 'cam-string))
+    ((and
+        (extra-target-alive?)
+        (= (-> (-> (-> (the-as (pointer camera-slave) (-> *camera* child))) state) name) 'cam-string))
       (send-event *camera* 'change-state cam-stick 0)
       )
     )
@@ -131,6 +137,7 @@
         (begin
           ;; spawn new target
           (set! tgt (-> (start-extra-target tgt-idx) 0))
+          (warp-jakA-to-jakB tgt *target*)
           (set! (-> *target-list* tgt-idx) (process->handle tgt))
           (case tgt-idx
             ((1) (draw-green tgt))
@@ -156,15 +163,21 @@
 (defun spawn-extra-targets-code()
   ;;Multiplayer stuff to clean and move
   (dotimes (tgt-idx (-> *target-list* length))
-    (when (and (> tgt-idx 0)
+    (cond 
+      ((and (> tgt-idx 0)
                (cpad-hold? tgt-idx l3)
                (or *cheat-mode* (= *kernel-boot-message* 'play)) ;; not in demo
                )
-      (check-cheat-code (-> *cheat-temp* tgt-idx) tgt-idx
-        (up up down down left right left right)
-        (cpad-clear! tgt-idx r1)
-        ;; toggle!
-      
+        (check-cheat-code (-> *cheat-temp* tgt-idx) tgt-idx
+          (up up down down left right left right)
+          (cpad-clear! tgt-idx r1)
+          ;; toggle!
+        
+          (cheats-sound-play *cheat-mode*)
+          (localmulti-start tgt-idx)
+          )
+        )
+      ((and (not (get-target tgt-idx)) (cpad-hold? tgt-idx l1) (cpad-hold? tgt-idx l2) (cpad-hold? tgt-idx r1) (cpad-hold? tgt-idx r2))
         (cheats-sound-play *cheat-mode*)
         (localmulti-start tgt-idx)
         )

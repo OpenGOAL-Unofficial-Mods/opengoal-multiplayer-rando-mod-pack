@@ -1599,7 +1599,7 @@
             *collide-cache*
             *collide-work*
             )
-          (if (logtest? (-> self control root-prim prim-core action) (collide-action ca-6))
+          (when (logtest? (-> self control root-prim prim-core action) (collide-action ca-6))
             (find-edge-grabs! self (-> *edge-collide-cache-list* tgt-idx) tgt-idx)
             )
           )
@@ -1743,7 +1743,7 @@
             *collide-cache*
             *collide-work*
             )
-          (if (logtest? (-> self control root-prim prim-core action) (collide-action ca-6))
+          (when (logtest? (-> self control root-prim prim-core action) (collide-action ca-6))
             (find-edge-grabs! self (-> *edge-collide-cache-list* tgt-idx) tgt-idx)
             )
           )

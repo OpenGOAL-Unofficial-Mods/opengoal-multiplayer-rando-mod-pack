@@ -483,7 +483,7 @@
   :code (behavior ((arg0 int) (arg1 level))
     (set! (-> self state-time) (-> *display* base-frame-counter))
     (when (not arg1)
-      (process-release? *target*)
+      (process-release-all-targets)
       (go-virtual idle)
       )
     (let ((s4-0 (new 'stack-no-clear 'event-message-block)))
@@ -495,8 +495,14 @@
         (set! (-> v1-9 quad) (-> self root trans quad))
         (set! (-> s4-0 param 1) (the-as uint v1-9))
         )
-      (set! (-> s4-0 param 2) (the-as uint (target-pos 0)))
-      (send-event-function *target* s4-0)
+      (dotimes (tgt-idx (-> *target-list* length))
+        (let ((tgt (get-target tgt-idx)))
+          (when tgt
+            (set! (-> s4-0 param 2) (the-as uint (target-pos-multi 0 tgt-idx)))
+            (send-event-function tgt s4-0)
+            )
+          )
+        )
       )
     ;; NOTE : added case for "training" here. in the original game, the training level does NOT come
     ;; with its own code for warp gates and buttons, and uses the villagep-obs imported from village1
