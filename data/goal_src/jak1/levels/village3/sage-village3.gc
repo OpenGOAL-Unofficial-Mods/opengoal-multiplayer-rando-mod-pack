@@ -187,8 +187,8 @@
   (-> obj draw art-group data 3)
   )
 
-(defmethod target-above-threshold? sage-villagec ((obj sage-villagec))
-  (the-as symbol (and *target* (< (-> (target-pos 0) x) 4575232.0) (< -14323302.0 (-> (target-pos 0) z))))
+(defmethod target-above-threshold? sage-villagec ((obj sage-villagec) (tgt-idx int))
+  (the-as symbol (and (get-target tgt-idx) (< (-> (target-pos-multi 0 tgt-idx) x) 4575232.0) (< -14323302.0 (-> (target-pos-multi 0 tgt-idx) z))))
   )
 
 (defmethod TODO-RENAME-43 sage-villagec ((obj sage-villagec))

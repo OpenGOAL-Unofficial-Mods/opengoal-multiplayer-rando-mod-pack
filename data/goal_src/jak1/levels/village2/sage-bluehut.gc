@@ -218,7 +218,7 @@
     )
   )
 
-(defmethod target-above-threshold? sage-bluehut ((obj sage-bluehut))
+(defmethod target-above-threshold? sage-bluehut ((obj sage-bluehut) (tgt-idx int))
   (local-vars (v0-1 symbol))
   (if (not (play-reminder obj))
       (return #f)
@@ -227,7 +227,7 @@
     (if (not gp-1)
         (return #t)
         )
-    (target-above-threshold? (the-as assistant-bluehut gp-1))
+    (target-above-threshold? (the-as assistant-bluehut gp-1) tgt-idx)
     (return (not (-> (the-as assistant-bluehut gp-1) im-talking)))
     )
   v0-1

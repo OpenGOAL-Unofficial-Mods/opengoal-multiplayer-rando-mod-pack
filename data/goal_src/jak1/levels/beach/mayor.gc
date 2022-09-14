@@ -644,10 +644,14 @@
   )
 
 (defmethod should-display? mayor ((obj mayor))
-  (if *target*
-      (< (- (-> (target-pos 0) z) (-> obj root-override trans z)) 57344.0)
-      (< (- (-> (camera-pos) z) (-> obj root-override trans z)) 57344.0)
+  (dotimes (tgt-idx (-> *target-list* length))
+    (let ((tgt (get-target tgt-idx)))
+      (if (and tgt (< (- (-> (target-pos-multi 0 tgt-idx) z) (-> obj root-override trans z)) 57344.0))
+        (return #t) ;; some target close enough
+        )
       )
+    )
+  (< (- (-> (camera-pos) z) (-> obj root-override trans z)) 57344.0)
   )
 
 (defmethod TODO-RENAME-43 mayor ((obj mayor))

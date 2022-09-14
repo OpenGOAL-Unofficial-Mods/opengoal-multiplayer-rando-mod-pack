@@ -699,15 +699,20 @@
   :virtual #t
   :event crate-standard-event-handler
   :trans (behavior ()
-    (cond
-      ((not (send-event *target* 'query 'powerup (pickup-type eco-blue)))
-       (logior! (-> self mask) (process-mask sleep-code))
-       (if (not (!= (-> self smush amp) 0.0))
-           (go-virtual wait)
-           )
-       )
-      (else
+    (let ((tgt-has-blue-eco #f))
+      (dotimes (tgt-idx (-> *target-list* length))
+        (when (and (get-target tgt-idx) (send-event (get-target tgt-idx) 'query 'powerup (pickup-type eco-blue)))
+          (set! tgt-has-blue-eco #t)
+          )
+        )
+      (if tgt-has-blue-eco
         (logclear! (-> self mask) (process-mask sleep-code))
+        (begin
+          (logior! (-> self mask) (process-mask sleep-code))
+          (if (not (!= (-> self smush amp) 0.0))
+            (go-virtual wait)
+            )
+          )
         )
       )
     (none)

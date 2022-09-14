@@ -179,8 +179,8 @@
     )
   )
 
-(defmethod target-above-threshold? explorer ((obj explorer))
-  (the-as symbol (and *target* (< (-> (target-pos 0) x) -202752.0) (< 98304.0 (-> (target-pos 0) z))))
+(defmethod target-above-threshold? explorer ((obj explorer) (tgt-idx int))
+  (the-as symbol (and (get-target tgt-idx) (< (-> (target-pos-multi 0 tgt-idx) x) -202752.0) (< 98304.0 (-> (target-pos 0) z))))
   )
 
 (defstate idle (explorer)

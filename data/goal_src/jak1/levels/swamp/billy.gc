@@ -558,6 +558,7 @@
           (let ((gp-0 (get-response (-> self query))))
             (cond
               ((and (= gp-0 'yes) (process-release? *target*))
+               (process-release-all-targets)
                (go-virtual enter-playing)
                )
               ((= gp-0 'no)
@@ -1092,10 +1093,10 @@
     )
   )
 
-(defmethod target-above-threshold? billy ((obj billy))
+(defmethod target-above-threshold? billy ((obj billy) (tgt-idx int))
   (the-as
     symbol
-    (and *target* (zero? (logand (-> *target* control root-prim prim-core action) (collide-action ca-14))))
+    (and (get-target tgt-idx) (zero? (logand (-> (get-target tgt-idx) control root-prim prim-core action) (collide-action ca-14))))
     )
   )
 

@@ -65,6 +65,16 @@
   "sprite": [["L51", "vu-function"]],
   "sprite-distort": [["L27", "vu-function"]],
   "sprite-glow": [["L29", "vu-function"]],
+  "debug": [
+    ["L250", "(inline-array vector)", 32],
+    ["L254", "(inline-array vector)", 3],
+    ["L253", "(inline-array vector)", 3],
+    ["L255", "vector2h"],
+    ["L256", "vector"],
+    ["L257", "vector"],
+    ["L258", "vector"],
+    ["L259", "vector"]
+  ],
   "mood-funcs": [
     ["L231", "vector"],
     ["L358", "(pointer uint64)", 1],
@@ -110,10 +120,69 @@
     ["L774", "(pointer uint64)", 1],
     ["L775", "(pointer uint64)", 1]
   ],
-  "collide-cache": [
-    ["L171", "vector"]
+  "collide-cache": [["L171", "vector"]],
+  "emerc-vu1": [["L1", "vu-function"]],
+  "mood-funcs2": [
+    ["L496", "(pointer uint64)", 1],
+    ["L497", "(pointer uint64)", 1],
+    ["L498", "(pointer uint64)", 1],
+    ["L499", "(pointer uint64)", 1],
+    ["L500", "(pointer uint64)", 1],
+    ["L501", "(pointer uint64)", 1],
+    ["L502", "(pointer uint64)", 1],
+    ["L503", "(pointer uint64)", 1],
+    ["L504", "(pointer uint64)", 1],
+    ["L505", "(pointer uint64)", 1],
+    ["L506", "(pointer uint64)", 1],
+    ["L507", "(pointer uint64)", 1],
+    ["L508", "(pointer uint64)", 1],
+    ["L509", "(pointer uint64)", 1],
+    ["L510", "(pointer uint64)", 1],
+    ["L312", "(pointer uint64)", 1],
+    ["L307", "vector"]
   ],
-  "emerc-vu1": [
-    ["L1", "vu-function"]
-  ]
+  "logic-target": [
+    ["L407", "(pointer float)", 1],
+    ["L408", "(pointer float)", 1],
+    ["L409", "attack-info"],
+    ["L414", "(pointer time-frame)", 1],
+    ["L415", "(pointer uint64)", 1],
+    ["L416", "(pointer uint64)", 1],
+    ["L417", "(pointer uint64)", 1],
+    ["L418", "(pointer uint64)", 1],
+    ["L419", "(pointer uint64)", 1],
+    ["L420", "(pointer uint64)", 1],
+    ["L421", "(pointer uint64)", 1]
+  ],
+  "editable": [
+    ["L545", "(pointer uint64)", 1],
+    ["L544", "(pointer uint64)", 1],
+    ["L550", "(pointer uint64)", 1],
+    ["L546", "(pointer uint64)", 1],
+    ["L547", "(pointer uint64)", 1],
+    ["L549", "(pointer uint64)", 1],
+    ["L548", "(pointer uint64)", 1],
+    ["L480", "vector"],
+    ["L479", "vector"],
+    ["L474", "vector"]
+  ],
+  "merc-vu1": [["L1", "vu-function"]],
+  "cam-layout": [
+    ["L784", "vector4w"], // needed or it guesses pointer and hits an assert
+    ["L791", "vector4w"],
+    ["L793", "vector4w"],
+    ["L795", "vector4w"],
+    ["L797", "vector4w"],
+    ["L799", "vector4w"],
+    ["L801", "vector4w"],
+    ["L888", "(pointer uint64)", 1],
+    ["L891", "(pointer uint64)", 1],
+    ["L892", "(pointer uint64)", 1],
+    ["L893", "(pointer uint64)", 1],
+    ["L894", "(pointer uint64)", 1],
+    ["L895", "(pointer uint64)", 1],
+    ["L896", "(pointer uint64)", 1],
+    ["L897", "(pointer uint64)", 1]
+  ],
+  "nav-mesh": [["L347", "(inline-array vector)", 2]]
 }
