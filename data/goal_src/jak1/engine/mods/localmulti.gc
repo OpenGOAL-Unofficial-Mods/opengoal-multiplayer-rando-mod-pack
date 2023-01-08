@@ -98,6 +98,20 @@
     (set!   (-> (the-as crate (the process-drawable (process-by-ename arg0)))defense)'wood)
 )(none)
 )
+(defun regular-camera-bool()
+        (case (-> *target* current-level name) 
+          (('jungleb)
+          #f
+           )
+           
+          (else
+          #t
+            )
+          )
+
+)
+
+
 (defun localmulti-run-eachframe()
 
 (crate-to-wood "crate-2590")
@@ -155,6 +169,7 @@
     ;;If the camera is not set to cam-stick, and we have more than one jak, then set it to cam-stick
     ((and
         (extra-target-alive?)
+        (regular-camera-bool)
         (= (-> (-> (-> (the-as (pointer camera-slave) (-> *camera* child))) state) name) 'cam-string))
       (send-event *camera* 'change-state cam-stick 0)
       )
