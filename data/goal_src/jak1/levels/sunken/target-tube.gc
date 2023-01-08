@@ -948,7 +948,7 @@
                            (-> self rot)
                            )
                      )
-                  (send-event *target* 'change-mode 'tube self)
+                  ;; BORKEN(send-event *target* 'change-mode 'tube self)
                   )
              )
         (go-virtual slide-control-ride)

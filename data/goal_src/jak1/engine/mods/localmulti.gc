@@ -64,8 +64,62 @@
       )
     )
 )
+(deftype crate (process-drawable)
+  ((root-override       collide-shape-moving         :offset        112)
+   (smush               smush-control        :inline :offset-assert 176)
+   (base                vector               :inline :offset-assert 208)
+   (look                symbol                       :offset-assert 224)
+   (defense             symbol                       :offset-assert 228)
+   (incomming-attack-id uint64                       :offset-assert 232)
+   (target              handle                       :offset-assert 240)
+   (child-count         int32                        :offset-assert 248)
+   (victory-anim        spool-anim                   :offset-assert 252)
+   )
+  :heap-base #x90
+  :method-count-assert 30
+  :size-assert         #x100
+  :flag-assert         #x1e00900100
+  (:methods
+    (wait () _type_ :state 20)
+    (die (symbol int) _type_ :state 21)
+    (special-contents-die () _type_ :state 22)
+    (bounce-on () _type_ :state 23)
+    (notice-blue (handle) _type_ :state 24)
+    (params-init (_type_ entity) none 25)
+    (art-init (_type_) crate 26)
+    (params-set! (_type_ symbol symbol) none 27)
+    (dummy-28 (_type_) none 28)
+    (smush-update! (_type_) none 29)
+    )
+  )
 
+(defun crate-to-wood ((arg0 string))
+  (when (process-by-ename arg0)
+    (set!   (-> (the-as crate (the process-drawable (process-by-ename arg0)))defense)'wood)
+)(none)
+)
 (defun localmulti-run-eachframe()
+
+(crate-to-wood "crate-2590")
+(crate-to-wood "crate-3044")
+(crate-to-wood "crate-3049")
+(crate-to-wood "crate-3055")
+(crate-to-wood "crate-3064")
+(crate-to-wood "crate-3074")
+(crate-to-wood "crate-2715")
+(crate-to-wood "crate-2718")
+(crate-to-wood "crate-3091")
+(crate-to-wood "crate-3093")
+(crate-to-wood "crate-3095")
+(crate-to-wood "crate-3097")
+(crate-to-wood "crate-3101")
+(crate-to-wood "crate-3109")
+(crate-to-wood "crate-3115")
+
+  ;;Change LPC crates from steel to wood
+
+(crate-to-wood "crate-3036")
+
   ;;If the camera is not focus on the main target (id 1375524), then set the cameras focus to the  main target.
   ;;todo this breaks pelican cutscene we can easily fix later.
   (when (and
